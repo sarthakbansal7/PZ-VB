@@ -111,12 +111,12 @@ export default function HeroSection() {
   }, [])
 
   return (
-    <section className="relative min-h-screen overflow-hidden">
+    <section className="relative min-h-screen overflow-hidden px-1 sm:px-1 lg:px-1">
       {/* White Top Section */}
       <div className="bg-white h-32"></div>
       
       {/* Blue Section with Rounded Corners */}
-      <div className="relative bg-gradient-to-br from-sky-400 via-sky-500 to-blue-600 rounded-t-[4rem] min-h-[calc(100vh-8rem)]">
+      <div className="relative bg-gradient-to-br from-sky-400 via-sky-500 to-blue-600 rounded-t-[4rem] min-h-[calc(100vh-8rem)] mx-1 sm:mx-2 lg:mx-4 xl:mx-8">
         {/* Animated Background Canvas */}
         <canvas
           ref={canvasRef}
