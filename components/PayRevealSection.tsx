@@ -1,8 +1,29 @@
 'use client'
 
 import { RevealText } from '@/components/reveal-text'
+import { CircularRevealHeading } from '@/components/ui/circular-reveal-heading'
 import { motion } from "framer-motion"
 import { useState, useEffect, useRef } from "react"
+
+// Web3 payments platform items for circular reveal
+const paymentItems = [
+  {
+    text: "INSTANT",
+    image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+  },
+  {
+    text: "SECURE",
+    image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+  },
+  {
+    text: "GLOBAL",
+    image: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+  },
+  {
+    text: "AUTOMATED",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+  }
+]
 
 // Custom component for ANYWHERE that shows images by default
 function AnywhereRevealText({ shouldAnimate }: { shouldAnimate: boolean }) {
@@ -123,40 +144,72 @@ export default function PayRevealSection() {
   return (
     <section ref={sectionRef} className="py-20 bg-gradient-to-b from-white to-gray-50">
       <div className="container mx-auto px-8 lg:px-16 max-w-7xl">
-        <div className="space-y-4 text-left">
-          <div className="flex justify-start">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          {/* Left Content - Reveal Text */}
+          <div className="space-y-4 text-left">
+            <div className="flex justify-start">
+              {isInView && (
+                <RevealText 
+                  text="PAY"
+                  textColor="text-gray-900"
+                  overlayColor="text-sky-500"
+                  fontSize="text-4xl md:text-6xl lg:text-8xl"
+                  letterDelay={0.08}
+                  overlayDelay={0.05}
+                  overlayDuration={0.4}
+                  springDuration={600}
+                />
+              )}
+            </div>
+            <div className="flex justify-start">
+              {isInView && (
+                <RevealText 
+                  text="ANYONE"
+                  textColor="text-gray-900"
+                  overlayColor="text-sky-500"
+                  fontSize="text-4xl md:text-6xl lg:text-8xl"
+                  letterDelay={0.1}
+                  overlayDelay={0.05}
+                  overlayDuration={0.4}
+                  springDuration={600}
+                />
+              )}
+            </div>
+            <AnywhereRevealText shouldAnimate={isInView} />
+            
+            <p className="mt-12 text-xl text-gray-600 max-w-2xl">
+              Experience seamless Web3 payments across multiple networks with our cutting-edge platform
+            </p>
+          </div>
+
+          {/* Right Content - Circular Reveal */}
+          <div className="flex items-center justify-center lg:justify-end">
             {isInView && (
-              <RevealText 
-                text="PAY"
-                textColor="text-gray-900"
-                overlayColor="text-sky-500"
-                fontSize="text-4xl md:text-6xl lg:text-8xl"
-                letterDelay={0.08}
-                overlayDelay={0.05}
-                overlayDuration={0.4}
-                springDuration={600}
-              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ 
+                  delay: 1.5, // Start after text animations
+                  duration: 0.8,
+                  type: "spring",
+                  damping: 20,
+                  stiffness: 100
+                }}
+              >
+                <CircularRevealHeading
+                  items={paymentItems}
+                  centerText={
+                    <div className="text-lg font-bold text-[#444444] text-center">
+                      <div className="text-sky-600">PayZoll</div>
+                      <div className="text-sm text-gray-500 mt-1">Web3 Payments</div>
+                    </div>
+                  }
+                  size="lg"
+                />
+              </motion.div>
             )}
           </div>
-          <div className="flex justify-start">
-            {isInView && (
-              <RevealText 
-                text="ANYONE"
-                textColor="text-gray-900"
-                overlayColor="text-sky-500"
-                fontSize="text-4xl md:text-6xl lg:text-8xl"
-                letterDelay={0.1}
-                overlayDelay={0.05}
-                overlayDuration={0.4}
-                springDuration={600}
-              />
-            )}
-          </div>
-          <AnywhereRevealText shouldAnimate={isInView} />
         </div>
-        <p className="mt-12 text-xl text-gray-600 max-w-3xl">
-          Experience seamless Web3 payments across multiple networks with our cutting-edge platform
-        </p>
       </div>
     </section>
   )
