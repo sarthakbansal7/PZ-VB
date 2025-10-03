@@ -1,295 +1,241 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useTheme } from "next-themes"
-import {
-  CardTransformed,
-  CardsContainer,
-  ContainerScroll,
-  ReviewStars,
-} from "@/components/animated-cards-stack"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import React from 'react';
+import { Star, Quote } from 'lucide-react';
 
-const TESTIMONIALS = [
+const testimonials = [
   {
-    id: "testimonial-3",
-    name: "James S.",
-    profession: "Frontend Developer",
+    id: 1,
+    name: "Sarah Chen",
+    role: "HR Director",
+    company: "TechFlow Inc.",
+    image: "https://images.unsplash.com/photo-1494790108755-2616b332c647?w=150&h=150&fit=crop&crop=face",
+    content: "VietBuild-Pay revolutionized our payroll process. The governance integration for our DAO operations is seamless, and the transparent payment system has improved trust across our organization.",
     rating: 5,
-    description:
-      "Their innovative solutions and quick turnaround time made our collaboration incredibly successful. Highly recommended!",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    category: "payroll"
   },
   {
-    id: "testimonial-1",
-    name: "Jessica H.",
-    profession: "Web Designer",
-    rating: 4.5,
-    description:
-      "The attention to detail and user experience in their work is exceptional. I'm thoroughly impressed with the final product.",
-    avatarUrl:
-      "https://plus.unsplash.com/premium_photo-1690407617542-2f210cf20d7e?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D",
-  },
-  {
-    id: "testimonial-2",
-    name: "Lisa M.",
-    profession: "UX Designer",
+    id: 2,
+    name: "Marcus Rodriguez",
+    role: "Community Manager",
+    company: "CryptoVerse DAO",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    content: "The airdrop distribution system saved us weeks of manual work. We distributed tokens to 10,000+ community members in minutes with their batch processing feature.",
     rating: 5,
-    description:
-      "Working with them was a game-changer for our project. Their expertise and professionalism exceeded our expectations.",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHByb2ZpbGV8ZW58MHx8MHx8fDA%3D",
+    category: "airdrop"
   },
   {
-    id: "testimonial-4",
-    name: "Jane D.",
-    profession: "UI/UX Designer",
-    rating: 4.5,
-    description:
-      "The quality of work and communication throughout the project was outstanding. They delivered exactly what we needed.",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDN8fHxlbnwwfHx8fHw%3D",
+    id: 3,
+    name: "Emily Watson",
+    role: "Finance Lead",
+    company: "BuildDAO",
+    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+    content: "The governance-linked payroll system ensures complete transparency. Every payment is tied to proposals, making our DAO operations truly decentralized and accountable.",
+    rating: 5,
+    category: "dao"
   },
-]
+  {
+    id: 4,
+    name: "David Kim",
+    role: "Operations Manager",
+    company: "StartupHub",
+    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    content: "The CSV bulk upload feature is a game-changer. Managing hundreds of employee payments has never been easier. The interface is intuitive and the process is lightning fast.",
+    rating: 5,
+    category: "payroll"
+  },
+  {
+    id: 5,
+    name: "Lisa Thompson",
+    role: "Blockchain Developer",
+    company: "Web3 Collective",
+    image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
+    content: "Multi-chain support is phenomenal. We run airdrops across Ethereum, BSC, and Polygon seamlessly. The gas optimization features save us thousands in transaction fees.",
+    rating: 5,
+    category: "airdrop"
+  },
+  {
+    id: 6,
+    name: "James Wilson",
+    role: "Treasury Manager",
+    company: "DeFi Guild",
+    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+    content: "The multi-sig integration with our DAO treasury is flawless. Every payment requires proper governance approval, ensuring complete decentralization and security.",
+    rating: 5,
+    category: "dao"
+  },
+  {
+    id: 7,
+    name: "Anna Martinez",
+    role: "People Operations",
+    company: "RemoteFirst Co.",
+    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+    content: "Global payroll has never been this simple. The platform handles different currencies and payment methods effortlessly. Our remote team gets paid on time, every time.",
+    rating: 5,
+    category: "payroll"
+  },
+  {
+    id: 8,
+    name: "Roberto Silva",
+    role: "Community Lead",
+    company: "GameFi Alliance",
+    image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face",
+    content: "The gamification features in their airdrop system increased our community engagement by 300%. Users love the interactive distribution process and real-time tracking.",
+    rating: 5,
+    category: "airdrop"
+  }
+];
 
-const ANIM_IMAGES = [
-  "https://img.freepik.com/free-photo/portrait-anime-character-doing-fitness-exercising_23-2151666687.jpg?semt=ais_hybrid&w=740",
-  "https://img.freepik.com/free-photo/anime-character-winter_23-2151843507.jpg?semt=ais_hybrid&w=740",
-  "https://img.freepik.com/free-photo/anime-character-using-virtual-reality-glasses-metaverse_23-2151568847.jpg?semt=ais_hybrid&w=740",
-  "https://img.freepik.com/free-photo/anime-character-using-virtual-reality-glasses-metaverse_23-2151568850.jpg?t=st=1747007259~exp=1747010859~hmac=0f9056951d9ea1c8bf86dd63e33b00ea3a34e3a40575b5ec5b7bd77cfca69ad6&w=996",
-  "https://img.freepik.com/free-photo/fantasy-anime-style-scene_23-2151135073.jpg?t=st=1747006767~exp=1747010367~hmac=f744af6af2545a9dcb4f01d78af38e2828b0375243bc3c1dfae391b2db68c09f&w=900",
-]
-
-function getSectionClass(theme: string | undefined) {
-  return theme === "dark"
-    ? "bg-destructive text-secondary px-8 py-12"
-    : "bg-accent px-8 py-12"
-}
-
-function getReviewStarsClass(theme: string | undefined) {
-  return theme === "dark" ? "text-primary" : "text-teal-500"
-}
-
-function getTextClass(theme: string | undefined) {
-  return theme === "dark" ? "text-primary-foreground" : ""
-}
-
-function getAvatarClass(theme: string | undefined) {
-  return theme === "dark"
-    ? "!size-12 border border-stone-700"
-    : "!size-12 border border-stone-300"
-}
-
-function getCardVariant(theme: string | undefined) {
-  return theme === "dark" ? "dark" : "light"
-}
-
-export function TestimonialsVariant() {
-  const { theme } = useTheme()
-
+const TestimonialsSection = () => {
   return (
-    <section className={getSectionClass(theme)}>
-      <div>
-        <h3 className="text-center text-4xl font-semibold">Testimonials</h3>
-        <p className="mx-auto mt-2 max-w-lg text-center text-sm">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus
-          consequatur reprehenderit.
-        </p>
-      </div>
-      <ContainerScroll className="h-[500vh]">
-        <div className="sticky top-0 left-0 right-0 h-screen w-full flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <CardsContainer className="h-[450px] w-[350px] relative">
-            {TESTIMONIALS.map((testimonial, index) => (
-              <CardTransformed
-                arrayLength={TESTIMONIALS.length}
-                key={testimonial.id}
-                variant={getCardVariant(theme)}
-                index={index + 2}
-                role="article"
-                aria-labelledby={`card-${testimonial.id}-title`}
-                aria-describedby={`card-${testimonial.id}-content`}
-              >
-                <div className="flex flex-col items-center space-y-4 text-center">
-                  <ReviewStars
-                    className={getReviewStarsClass(theme)}
-                    rating={testimonial.rating}
-                  />
-                  <div className={`mx-auto w-4/5 text-lg ${getTextClass(theme)}`}>
-                    <blockquote cite="#">{testimonial.description}</blockquote>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <Avatar className={getAvatarClass(theme)}>
-                    <AvatarImage
-                      src={testimonial.avatarUrl}
-                      alt={`Portrait of ${testimonial.name}`}
-                    />
-                    <AvatarFallback>
-                      {testimonial.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <span className="block text-lg font-semibold tracking-tight md:text-xl">
-                      {testimonial.name}
-                    </span>
-                    <span className="block text-sm text-muted-foreground ">
-                      {testimonial.profession}
-                    </span>
-                  </div>
-                </div>
-              </CardTransformed>
-            ))}
-            </CardsContainer>
+    <section className="py-20 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 overflow-hidden">
+      <div className="container mx-auto px-4">
+        {/* Section Header */}
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Trusted by{' '}
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Industry Leaders
+            </span>
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            See how organizations worldwide are transforming their payment operations with VietBuild-Pay
+          </p>
+        </div>
+
+        {/* Scrolling Testimonials Container */}
+        <div className="relative">
+          {/* Gradient Overlays for fade effect */}
+          <div className="absolute left-0 top-0 w-32 h-full bg-gradient-to-r from-slate-50 via-blue-50 to-transparent z-10 pointer-events-none"></div>
+          <div className="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-slate-50 via-blue-50 to-transparent z-10 pointer-events-none"></div>
+          
+          {/* First Row - Left to Right */}
+          <div className="mb-8">
+            <div className="flex animate-scroll-left space-x-6">
+              {/* Duplicate testimonials for seamless loop */}
+              {[...testimonials, ...testimonials].map((testimonial, index) => (
+                <TestimonialCard key={`row1-${index}`} testimonial={testimonial} />
+              ))}
+            </div>
+          </div>
+
+          {/* Second Row - Right to Left */}
+          <div className="mb-8">
+            <div className="flex animate-scroll-right space-x-6">
+              {/* Reverse and duplicate for opposite direction */}
+              {[...testimonials.slice().reverse(), ...testimonials.slice().reverse()].map((testimonial, index) => (
+                <TestimonialCard key={`row2-${index}`} testimonial={testimonial} />
+              ))}
+            </div>
           </div>
         </div>
-      </ContainerScroll>
-    </section>
-  )
-}
-
-export const AwardsVariant = () => {
-  return (
-    <section className="bg-accent px-8 py-12">
-      <div>
-        <h2 className="text-center text-4xl font-semibold">Recognitions</h2>
-        <p className="mx-auto mt-2 max-w-lg text-center text-sm">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus
-          consequatur reprehenderit.
-        </p>
       </div>
-      <ContainerScroll className="container h-[300vh] ">
-        <div className="sticky left-0 top-0 h-svh w-full py-12">
-          <CardsContainer className="mx-auto size-full h-72 w-[440px]">
-            <CardTransformed
-              className="items-start justify-evenly border-none bg-blue-600/80  text-secondary backdrop-blur-md"
-              arrayLength={TESTIMONIALS.length}
-              index={1}
-            >
-              <div className="flex flex-col items-start justify-start space-y-4 ">
-                <div className="flex size-16 items-center justify-center  rounded-sm bg-secondary/50 text-2xl">
-                  🏆
-                </div>
-                <div>
-                  <h4 className="text-sm uppercase tracking-wide">Awwwards</h4>
-                  <h3 className="text-2xl font-bold">Site of the Day</h3>
-                </div>
-              </div>
-              <p className=" text-secondary/80">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Repellendus consequatur reprehenderit.
-              </p>
-            </CardTransformed>
 
-            <CardTransformed
-              className="items-start justify-evenly border-none bg-orange-600/80 text-secondary backdrop-blur-md"
-              arrayLength={TESTIMONIALS.length}
-              index={2}
-            >
-              <div className="flex flex-col items-start justify-start space-y-4 ">
-                <div className="flex size-16 items-center justify-center  rounded-sm bg-secondary/50 text-2xl">
-                  🚀
-                </div>
-                <div>
-                  <h4 className="text-sm uppercase tracking-wide">
-                    Performance
-                  </h4>
-                  <h3 className="text-2xl font-bold">100% Performance Score</h3>
-                </div>
-              </div>
-              <p className=" text-secondary/80">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Repellendus consequatur reprehenderit.
-              </p>
-            </CardTransformed>
-            <CardTransformed
-              className="items-start justify-evenly border-none bg-cyan-600/80 text-secondary backdrop-blur-md"
-              arrayLength={TESTIMONIALS.length}
-              index={3}
-            >
-              <div className="flex flex-col items-start justify-start space-y-4 ">
-                <div className="flex size-16 items-center justify-center  rounded-sm bg-secondary/50 text-2xl">
-                  🎯
-                </div>
-                <div>
-                  <h4 className="text-sm uppercase tracking-wide">
-                    CSS awaaards
-                  </h4>
-                  <h3 className="text-2xl font-bold">Honorable Mention</h3>
-                </div>
-              </div>
-              <p className=" text-secondary/80">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Repellendus consequatur reprehenderit.
-              </p>
-            </CardTransformed>
-            <CardTransformed
-              className="items-start justify-evenly border-none bg-violet-600/80 text-secondary backdrop-blur-md"
-              arrayLength={TESTIMONIALS.length}
-              index={4}
-            >
-              <div className="flex flex-col items-start justify-start space-y-4 ">
-                <div className="flex size-16 items-center justify-center  rounded-sm bg-secondary/50 text-2xl">
-                  🎖
-                </div>
-                <div>
-                  <h4 className="text-sm uppercase tracking-wide">awaaards</h4>
-                  <h4 className="text-2xl font-bold">Most Creative Design</h4>
-                </div>
-              </div>
-              <p className=" text-secondary/80">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Repellendus consequatur reprehenderit.
-              </p>
-            </CardTransformed>
-          </CardsContainer>
-        </div>
-      </ContainerScroll>
+      {/* Custom CSS for animations */}
+      <style jsx>{`
+        @keyframes scroll-left {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+
+        @keyframes scroll-right {
+          0% {
+            transform: translateX(-50%);
+          }
+          100% {
+            transform: translateX(0);
+          }
+        }
+
+        .animate-scroll-left {
+          animation: scroll-left 60s linear infinite;
+          width: fit-content;
+        }
+
+        .animate-scroll-right {
+          animation: scroll-right 60s linear infinite;
+          width: fit-content;
+        }
+
+        .animate-scroll-left:hover,
+        .animate-scroll-right:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
     </section>
-  )
-}
+  );
+};
 
-export const ImagesVariant = () => {
+const TestimonialCard = ({ testimonial }: { testimonial: typeof testimonials[0] }) => {
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'payroll':
+        return 'from-green-500 to-emerald-500';
+      case 'airdrop':
+        return 'from-purple-500 to-violet-500';
+      case 'dao':
+        return 'from-orange-500 to-amber-500';
+      default:
+        return 'from-blue-500 to-indigo-500';
+    }
+  };
+
+  const getCategoryBadge = (category: string) => {
+    switch (category) {
+      case 'payroll':
+        return { text: 'Payroll', emoji: '💼' };
+      case 'airdrop':
+        return { text: 'Airdrop', emoji: '🎯' };
+      case 'dao':
+        return { text: 'DAO', emoji: '🏛️' };
+      default:
+        return { text: 'Platform', emoji: '⚡' };
+    }
+  };
+
+  const categoryInfo = getCategoryBadge(testimonial.category);
+
   return (
-    <section className=" bg-slate-900 px-8 py-12">
-      <div>
-        <h2 className="text-center text-4xl font-semibold">
-          Try our AI Fantázomai
-        </h2>
-        <p className="mx-auto mt-2 max-w-lg text-center text-sm">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus
-          consequatur reprehenderit.
-        </p>
-      </div>
-      <ContainerScroll className="container h-[300vh] ">
-        <div className="sticky left-0 top-0 h-svh w-full py-12">
-          <CardsContainer className="mx-auto size-full h-[420px] w-[320px]">
-            {ANIM_IMAGES.map((imageUrl, index) => (
-              <CardTransformed
-                arrayLength={ANIM_IMAGES.length}
-                key={index}
-                index={index + 2}
-                variant={"dark"}
-                className="overflow-hidden !rounded-sm !p-0"
-              >
-                <img
-                  src={imageUrl}
-                  alt="anime"
-                  className="size-full object-cover"
-                  width={"100%"}
-                  height={"100%"}
-                />
-              </CardTransformed>
-            ))}
-          </CardsContainer>
+    <div className="flex-shrink-0 w-96 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-100 hover:scale-105">
+      {/* Category Badge */}
+      <div className="flex justify-between items-start mb-4">
+        <div className={`px-3 py-1 rounded-full text-xs font-medium text-white bg-gradient-to-r ${getCategoryColor(testimonial.category)}`}>
+          {categoryInfo.emoji} {categoryInfo.text}
         </div>
-      </ContainerScroll>
-    </section>
-  )
-}
+        <Quote className="text-gray-300" size={24} />
+      </div>
 
-export default TestimonialsVariant
+      {/* Content */}
+      <p className="text-gray-700 text-sm leading-relaxed mb-6 line-clamp-4">
+        "{testimonial.content}"
+      </p>
+
+      {/* Rating */}
+      <div className="flex items-center mb-4">
+        {[...Array(testimonial.rating)].map((_, i) => (
+          <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+        ))}
+      </div>
+
+      {/* User Info */}
+      <div className="flex items-center">
+        <img
+          src={testimonial.image}
+          alt={testimonial.name}
+          className="w-12 h-12 rounded-full object-cover mr-4"
+        />
+        <div>
+          <h4 className="font-semibold text-gray-900 text-sm">{testimonial.name}</h4>
+          <p className="text-gray-600 text-xs">{testimonial.role}</p>
+          <p className="text-gray-500 text-xs">{testimonial.company}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TestimonialsSection;
