@@ -15,6 +15,13 @@ export interface Employee {
     company: string;
 }
 
+export interface BulkRecipient {
+    name: string;
+    wallet: string;
+    amount: string;
+    description?: string;
+}
+
 export interface PayrollData {
     company: string;
     employees: Array<{
