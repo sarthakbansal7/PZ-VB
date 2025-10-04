@@ -127,7 +127,7 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
             >
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">
-                  {isEditing ? "Edit Employee" : "Add New Employee"}
+                  {isEditing ? "Edit Recipient" : "Add New Recipient"}
                 </h2>
                 <button onClick={onClose} aria-label="Close">
                   <X className="text-neutral-500 hover:text-red-500" />

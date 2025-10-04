@@ -6,7 +6,7 @@ import ConfigurePayModal from "@/components/payroll/ConfigurePayModal";
 import PaymentDashboard from "@/components/payroll/PaymentDashboard";
 import AddRecipientModal from "@/components/payroll/AddEmployeeModal";
 import BulkUploadModal from "@/components/payroll/BulkuploadModal";
-import { Employee as Recipient, PayrollData } from "@/lib/interfaces";
+import { Employee as Recipient, BulkRecipient, PayrollData } from "@/lib/interfaces";
 import { toast } from "react-hot-toast";
 import { parseUnits } from 'ethers';
 import { contractMainnetAddresses as transferContract } from '@/lib/evm-tokens-mainnet';
@@ -31,7 +31,7 @@ const BulkPayoutPage: React.FC = () => {
   const [selectedTokenSymbol, setSelectedTokenSymbol] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showBulkUploadModal, setShowBulkUploadModal] = useState(false);
-  const [recipients, setRecipients] = useState<Recipient[]>([]);
+  const [recipients, setRecipients] = useState<BulkRecipient[]>([]);
   const [selectedRecipient, setSelectedRecipient] = useState<Recipient | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -106,30 +106,12 @@ const BulkPayoutPage: React.FC = () => {
   };
 
   useEffect(() => {
-    // Initialize with mock data instead of fetching from backend
-    const mockRecipients: Recipient[] = [
-      {
-        wallet: "0x1234567890123456789012345678901234567890",
-        name: "Alice Johnson",
-        email: "alice@example.com",
-        salary: "1500",
-        designation: "Contributor",
-        company: "Demo Project"
-      },
-      {
-        wallet: "0x2345678901234567890123456789012345678901",
-        name: "Bob Smith", 
-        email: "bob@example.com",
-        salary: "2500",
-        designation: "Freelancer",
-        company: "Demo Project"
-      }
-    ];
-    setRecipients(mockRecipients);
+    // Initialize with empty recipients for bulk disbursement
+    setRecipients([]);
     setIsLoading(false);
 
     // Set project name
-    setProjectName("Demo Project");
+    setProjectName("Bulk Disbursement");
   }, []);
 
   // Effect to update chain based on connected wallet
@@ -193,7 +175,7 @@ const BulkPayoutPage: React.FC = () => {
   const calculateTotalAmount = () => {
     return recipients
       .filter(recipient => selectedRecipients.includes(recipient.wallet))
-      .reduce((sum, recipient) => sum + parseFloat(recipient.salary), 0);
+      .reduce((sum, recipient) => sum + parseFloat(recipient.amount), 0);
   };
 
   // Get recipients and amounts for selected recipients
@@ -203,7 +185,7 @@ const BulkPayoutPage: React.FC = () => {
     return {
       recipients: selectedRecipientData.map(recipient => recipient.wallet as `0x${string}`),
       amounts: selectedRecipientData.map(recipient => {
-        const tokenAmount = usdToToken(recipient.salary);
+        const tokenAmount = usdToToken(recipient.amount);
         return parseUnits(tokenAmount, selectedToken.decimals);
       })
     };
@@ -427,14 +409,35 @@ const BulkPayoutPage: React.FC = () => {
     }
   };
 
-  const handleEditRecipient = (recipient: Recipient) => {
-    setSelectedRecipient(recipient);
+  // Adapter functions to convert between Employee and BulkRecipient interfaces
+  const convertBulkRecipientToEmployee = (recipient: BulkRecipient): Recipient => {
+    return {
+      name: recipient.name,
+      wallet: recipient.wallet,
+      email: "", // Not used in bulk disbursement
+      salary: recipient.amount,
+      designation: recipient.description || "",
+      company: "Bulk Disbursement"
+    };
+  };
+
+  const convertEmployeeToBulkRecipient = (employee: Recipient): BulkRecipient => {
+    return {
+      name: employee.name,
+      wallet: employee.wallet,
+      amount: employee.salary,
+      description: employee.designation
+    };
+  };
+
+  const handleEditRecipient = (recipient: BulkRecipient) => {
+    setSelectedRecipient(convertBulkRecipientToEmployee(recipient));
     setShowAddModal(true);
   };
 
-  const handleAddRecipient = async (recipient: Recipient) => {
+  const handleAddRecipient = async (employee: Recipient) => {
     try {
-      const newRecipient = { ...recipient, wallet: recipient.wallet };
+      const newRecipient = convertEmployeeToBulkRecipient(employee);
       setRecipients((prevRecipients) => [...prevRecipients, newRecipient]);
       setShowAddModal(false);
       toast.success("Recipient added successfully");
@@ -446,9 +449,10 @@ const BulkPayoutPage: React.FC = () => {
 
   const handleUpdateRecipient = async (wallet: string, updatedData: Partial<Recipient>) => {
     try {
+      const updatedBulkData = convertEmployeeToBulkRecipient(updatedData as Recipient);
       setRecipients((prevRecipients) =>
         prevRecipients.map((recipient) =>
-          recipient.wallet === wallet ? { ...recipient, ...updatedData } : recipient
+          recipient.wallet === wallet ? { ...recipient, ...updatedBulkData } : recipient
         )
       );
       setShowAddModal(false);
@@ -484,7 +488,7 @@ const BulkPayoutPage: React.FC = () => {
         <PaymentDashboard
           exchangeRate={exchangeRate}
           selectedTokenSymbol={selectedTokenSymbol}
-          employees={recipients}
+          employees={recipients.map(convertBulkRecipientToEmployee)}
           isConnected={isConnected}
           selectedEmployees={selectedRecipients}
           toggleEmployeeSelection={toggleRecipientSelection}
@@ -508,7 +512,7 @@ const BulkPayoutPage: React.FC = () => {
           getExplorerUrl={getExplorerUrl}
           selectedToken={selectedToken}
           handleAddEmployeeClick={handleAddRecipientClick}
-          handleEditEmployee={handleEditRecipient}
+          handleEditEmployee={(employee) => handleEditRecipient(convertEmployeeToBulkRecipient(employee))}
           deleteEmployeeById={(wallet: string) => {
             setWalletToDelete(wallet);
             setIsDeleteDialogOpen(true);
