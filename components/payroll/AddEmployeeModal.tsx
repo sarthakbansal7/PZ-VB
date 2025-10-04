@@ -48,11 +48,11 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
     if (editEmployee) {
       setFormData({
         name: editEmployee.name,
-        designation: editEmployee.designation,
+        designation: "",
         wallet: editEmployee.wallet,
         salary: editEmployee.salary,
-        email: editEmployee.email || "",
-        company: user?.company?.toString() || "",
+        email: "",
+        company: "",
       });
     } else if (isOpen) {
       setFormData({
@@ -61,15 +61,15 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
         wallet: "",
         salary: "",
         email: "",
-        company: user?.company?.toString() || "",
+        company: "",
       });
       setErrors({});
     }
-  }, [editEmployee, user, isOpen]);
+  }, [editEmployee, isOpen]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value, company: user?.company?.toString() || "" }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name as keyof Employee]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
@@ -78,15 +78,23 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const newErrors: Partial<Employee> = {};
-    Object.entries(formData).forEach(([key, value]) => {
-      if (!value.toString().trim()) {
-        newErrors[key as keyof Employee] = "This field is required";
-      }
-    });
+    
+    // Only validate required fields for bulk disbursement
+    if (!formData.name.trim()) {
+      newErrors.name = "Recipient name is required";
+    }
+    if (!formData.salary.trim()) {
+      newErrors.salary = "Amount is required";
+    }
+    if (!formData.wallet.trim()) {
+      newErrors.wallet = "Wallet address is required";
+    }
+    
     if (Object.keys(newErrors).length) {
       setErrors(newErrors);
       return;
     }
+    
     if (isEditing && onUpdateEmployee) {
       onUpdateEmployee(editEmployee!.wallet, formData);
     } else {
@@ -222,6 +230,7 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
             isOpen={isBulkUploadOpen}
             onClose={() => setIsBulkUploadOpen(false)}
             onUploadSuccess={onUploadSuccess}
+            onRecipientsUploaded={() => {}} // No-op for individual add modal
           />
         </motion.div>
       )}
