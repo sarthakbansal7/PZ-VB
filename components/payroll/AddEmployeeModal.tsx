@@ -40,7 +40,7 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
     wallet: "",
     salary: "",
     email: "",
-    company: user?.company?.toString() || "",
+    company: "",
   });
   const isEditing = Boolean(editEmployee);
 
