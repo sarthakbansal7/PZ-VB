@@ -10,7 +10,7 @@ interface BulkUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
   onUploadSuccess: () => void;
-  onRecipientsUploaded: (recipients: any[]) => void;
+  onRecipientsUploaded?: (recipients: any[]) => void; // Optional for backward compatibility
 }
 
 const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ isOpen, onClose, onUploadSuccess, onRecipientsUploaded }) => {
@@ -192,8 +192,10 @@ const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ isOpen, onClose, onUp
         details: successDetails
       });
 
-      // Add recipients to the table
-      onRecipientsUploaded(recipients);
+      // Add recipients to the table (if callback is provided)
+      if (onRecipientsUploaded) {
+        onRecipientsUploaded(recipients);
+      }
 
       // Call the success callback after a delay for better UX
       setTimeout(() => {

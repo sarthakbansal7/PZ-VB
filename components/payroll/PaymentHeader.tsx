@@ -109,7 +109,7 @@ const PaymentsHeader: React.FC<PaymentsHeaderProps> = ({
                 className="w-full text-left px-3 py-2.5 rounded-lg text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/60 flex items-center gap-3 transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                Add Employee
+                Add Recipients
               </button>
               <button
                 onClick={() => handleMenuAction(onBulkUpload)}
