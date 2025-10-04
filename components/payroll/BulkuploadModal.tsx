@@ -10,9 +10,10 @@ interface BulkUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
   onUploadSuccess: () => void;
+  onRecipientsUploaded: (recipients: any[]) => void;
 }
 
-const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ isOpen, onClose, onUploadSuccess }) => {
+const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ isOpen, onClose, onUploadSuccess, onRecipientsUploaded }) => {
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -107,17 +108,92 @@ const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ isOpen, onClose, onUp
       setIsUploading(true);
       setUploadStatus(null);
 
-      // Simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Read and parse the CSV file
+      const text = await selectedFile.text();
+      const lines = text.split('\n').filter(line => line.trim());
+      
+      if (lines.length < 2) {
+        throw new Error("CSV file must contain at least a header and one data row");
+      }
 
-      // Mock successful response
+      // Parse header
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+      
+      // Validate expected headers
+      const requiredHeaders = ['name', 'wallet address', 'amount (usd)'];
+      const missingHeaders = requiredHeaders.filter(header => 
+        !headers.some(h => h.includes(header.replace(' (usd)', '')) || h.includes('amount'))
+      );
+      
+      if (missingHeaders.length > 0) {
+        throw new Error(`Missing required columns: ${missingHeaders.join(', ')}`);
+      }
+
+      // Parse data rows
+      const recipients: any[] = [];
+      const errors: string[] = [];
+      
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim());
+        
+        if (values.length !== headers.length) {
+          errors.push(`Row ${i + 1}: Column count mismatch`);
+          continue;
+        }
+
+        const nameIndex = headers.findIndex(h => h.includes('name'));
+        const walletIndex = headers.findIndex(h => h.includes('wallet'));
+        const amountIndex = headers.findIndex(h => h.includes('amount'));
+
+        const name = values[nameIndex]?.replace(/['"]/g, '');
+        const wallet = values[walletIndex]?.replace(/['"]/g, '');
+        const amount = values[amountIndex]?.replace(/['"]/g, '');
+
+        if (!name || !wallet || !amount) {
+          errors.push(`Row ${i + 1}: Missing required data (name, wallet, or amount)`);
+          continue;
+        }
+
+        // Validate wallet address format
+        if (!wallet.match(/^0x[a-fA-F0-9]{40}$/)) {
+          errors.push(`Row ${i + 1}: Invalid wallet address format`);
+          continue;
+        }
+
+        // Validate amount is a number
+        if (isNaN(parseFloat(amount))) {
+          errors.push(`Row ${i + 1}: Invalid amount format`);
+          continue;
+        }
+
+        recipients.push({
+          name,
+          wallet,
+          salary: amount,
+          designation: "",
+          email: "",
+          company: ""
+        });
+      }
+
+      if (recipients.length === 0) {
+        throw new Error("No valid recipients found in CSV file");
+      }
+
+      // Show success message
+      const successDetails = [
+        `Successfully parsed ${recipients.length} recipient(s)`,
+        ...(errors.length > 0 ? [`${errors.length} row(s) had errors and were skipped`] : [])
+      ];
+
       setUploadStatus({
         success: true,
         message: "Upload successful",
-        details: [
-          "File processed successfully. Employees added to local list."
-        ]
+        details: successDetails
       });
+
+      // Add recipients to the table
+      onRecipientsUploaded(recipients);
 
       // Call the success callback after a delay for better UX
       setTimeout(() => {
@@ -174,7 +250,7 @@ const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ isOpen, onClose, onUp
                       <Upload className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 dark:text-gray-300" />
                     </div>
                     <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-black dark:text-white tracking-tight">
-                      Bulk Upload Employees
+                      Bulk Upload Recipients
                     </h2>
                   </div>
                   <motion.button
@@ -231,7 +307,7 @@ const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ isOpen, onClose, onUp
                     onChange={handleChange}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     aria-label="Upload CSV or Excel file"
-                    title="Upload employee data file"
+                    title="Upload recipient data file"
                     disabled={isUploading}
                   />
                   <div className="space-y-3 sm:space-y-4">
@@ -319,7 +395,7 @@ const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ isOpen, onClose, onUp
                       <ul className="list-disc pl-4 sm:pl-5 space-y-1 text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
                         <li>Required fields: name, email, designation, salary, wallet</li>
                         <li>Wallet addresses must be valid Ethereum addresses</li>
-                        <li>Maximum 100 employees per upload</li>
+                        <li>Maximum 100 recipients per upload</li>
                         <li>File size should not exceed 5MB</li>
                       </ul>
                     </div>
