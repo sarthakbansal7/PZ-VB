@@ -135,10 +135,10 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
               </div>
 
               <form className="my-8" onSubmit={handleSubmit}>
-                {/* Name & Company */}
-                <div className="mb-4 flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
+                {/* Name */}
+                <div className="mb-4">
                   <LabelInputContainer>
-                    <Label htmlFor="name">Name</Label>
+                    <Label htmlFor="name">Recipient Name</Label>
                     <Input
                       id="name"
                       name="name"
@@ -149,46 +149,26 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
                     />
                     {errors.name && <p className="text-sm text-red-600 mt-1">{errors.name}</p>}
                   </LabelInputContainer>
+                </div>
+
+                {/* Amount */}
+                <div className="mb-4">
                   <LabelInputContainer>
-                    <Label htmlFor="company">Company</Label>
+                    <Label htmlFor="salary">Amount (USD)</Label>
                     <Input
-                      id="company"
-                      name="company"
-                      value={user?.company?.toString() || ""}
-                      disabled
-                      className="opacity-60 cursor-not-allowed"
+                      id="salary"
+                      name="salary"
+                      placeholder="100.00"
+                      value={formData.salary}
+                      onChange={handleInputChange}
+                      className={cn(errors.salary && "border-red-500 focus:ring-red-500")}
                     />
+                    {errors.salary && <p className="text-sm text-red-600 mt-1">{errors.salary}</p>}
                   </LabelInputContainer>
                 </div>
 
-                {/* Designation & Email */}
-                <div className="mb-4 flex flex-col space-y-4">
-                  <LabelInputContainer>
-                    <Label htmlFor="designation">Designation</Label>
-                    <Input
-                      id="designation"
-                      name="designation"
-                      placeholder="Senior Developer"
-                      value={formData.designation}
-                      onChange={handleInputChange}
-                      className={cn(errors.designation && "border-red-500 focus:ring-red-500")}
-                    />
-                    {errors.designation && <p className="text-sm text-red-600 mt-1">{errors.designation}</p>}
-                  </LabelInputContainer>
-                  <LabelInputContainer>
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="john@abc.com"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className={cn(errors.email && "border-red-500 focus:ring-red-500")}
-                    />
-                    {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email}</p>}
-                  </LabelInputContainer>
-
+                {/* Wallet Address */}
+                <div className="mb-4">
                   <LabelInputContainer>
                     <Label htmlFor="wallet">Wallet Address</Label>
                     <Input
@@ -200,18 +180,6 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
                       className={cn(errors.wallet && "border-red-500 focus:ring-red-500")}
                     />
                     {errors.wallet && <p className="text-sm text-red-600 mt-1">{errors.wallet}</p>}
-                  </LabelInputContainer>
-                  <LabelInputContainer>
-                    <Label htmlFor="salary">Salary (USD)</Label>
-                    <Input
-                      id="salary"
-                      name="salary"
-                      placeholder="5000"
-                      value={formData.salary}
-                      onChange={handleInputChange}
-                      className={cn(errors.salary && "border-red-500 focus:ring-red-500")}
-                    />
-                    {errors.salary && <p className="text-sm text-red-600 mt-1">{errors.salary}</p>}
                   </LabelInputContainer>
                 </div>
 
@@ -229,7 +197,7 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
                       type="submit"
                       className="group/btn relative block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-white shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset]"
                     >
-                      {isEditing ? "Update Employee" : "Add Employee"}
+                      {isEditing ? "Update Recipient" : "Add Recipient"}
                       <BottomGradient />
                     </button>
                   </div>
