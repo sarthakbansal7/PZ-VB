@@ -8,7 +8,7 @@ import { useAccount, usePublicClient } from 'wagmi';
 import TokenSelector from './TokenSelector';
 import { allMainnetChains as chains } from '@/lib/evm-chains-mainnet';
 import { tokensPerMainnetChain as tokens, Token } from '@/lib/evm-tokens-mainnet';
-import { getExchangeRate } from '@/lib/chainlink-helper';
+import { getExchangeRate, getU2UPrice } from '@/lib/chainlink-helper';
 import { ethers } from 'ethers';
 import { CardSpotlight } from "../ui/cardSpotlight";
 
@@ -155,6 +155,32 @@ const ConfigurePayModal: React.FC<ConfigurePayModalProps> = ({
         await new Promise(resolve => setTimeout(resolve, 800)); // Reduced from 1500ms for better UX
       }
 
+      // Special handling for U2U token - use CoinGecko directly
+      if (token.symbol === 'U2U') {
+        const u2uData = await getU2UPrice();
+        if (u2uData && u2uData.exchangeRate) {
+          const rate = u2uData.exchangeRate;
+          setExchangeRate(rate);
+
+          if (onExchangeRateUpdate) {
+            onExchangeRateUpdate(rate, token.symbol);
+          }
+
+          setIsCalculating(false);
+
+          // Only update completion UI for manual updates
+          if (!isAutoUpdate) {
+            setCalculationComplete(true);
+            // Reset completion status after a delay
+            setTimeout(() => {
+              setCalculationComplete(false);
+            }, 3000);
+          }
+          return; // Exit early since we got the U2U price
+        }
+        // If U2U price fetch fails, continue with regular getExchangeRate logic
+      }
+
       // Get the exchange rate - make sure we use the passed chain ID
       // This will automatically use CoinGecko as fallback if Chainlink fails
       const rate = await getExchangeRate(
@@ -189,6 +215,21 @@ const ConfigurePayModal: React.FC<ConfigurePayModalProps> = ({
 
       // Let the getExchangeRate function handle all fallbacks
       try {
+        // Special handling for U2U token in fallback as well
+        if (token.symbol === 'U2U') {
+          const u2uData = await getU2UPrice();
+          if (u2uData && u2uData.exchangeRate) {
+            const fallbackRate = u2uData.exchangeRate;
+            setExchangeRate(fallbackRate);
+
+            if (onExchangeRateUpdate) {
+              onExchangeRateUpdate(fallbackRate, token.symbol);
+            }
+            setIsCalculating(false);
+            return; // Exit early since we got the U2U price
+          }
+        }
+
         // Even if provider creation failed, we can pass null and let getExchangeRate handle it
         const fallbackRate = await getExchangeRate(
           null as any, // This will trigger the fallback logic in getExchangeRate
