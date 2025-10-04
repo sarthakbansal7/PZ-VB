@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useMemo, useEffect, useRef, Fragment } from 'react';
 import {
-    Edit, Trash2, Search, Download, DollarSign, Eye, RefreshCcw, CheckSquare, Square,
+    Edit, Trash2, Search, Download, DollarSign, RefreshCcw, CheckSquare, Square,
     ChevronLeft, ChevronRight, SortAsc, SortDesc, X, ArrowUpDown, MoreVertical
 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -11,11 +11,7 @@ import { Menu as HeadlessMenu, Transition } from '@headlessui/react';
 
 const sortableColumns: { key: keyof Employee; label: string }[] = [
     { key: 'name', label: 'Name' },
-    { key: 'email', label: 'Email' },
-    { key: 'designation', label: 'Designation' },
-    { key: 'salary', label: 'Salary' },
     { key: 'wallet', label: 'Wallet' },
-    { key: 'company', label: 'Company' },
 ];
 
 const ITEMS_PER_PAGE = 10;
@@ -81,7 +77,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
 
     // Initialize visibleColumns state including the token amount column key
     const [visibleColumns, setVisibleColumns] = useState<Set<keyof Employee | 'actions' | string>>(() =>
-        new Set(['name', 'designation', 'salary', tokenAmountColumnKey, 'wallet', 'actions']) // Ensure tokenAmountColumnKey is here
+        new Set(['name', tokenAmountColumnKey, 'wallet', 'actions']) // Ensure tokenAmountColumnKey is here
     );
 
     // Effect to update visible columns if the token symbol changes and the key needs updating
@@ -250,14 +246,14 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
 
     const handleExportCSV = () => {
         if (selectedEmployees.length === 0) {
-            setExportNotification('Please select at least one employee to export');
+            setExportNotification('Please select at least one recipient to export');
             setTimeout(() => setExportNotification(''), 3000);
             return;
         }
         const selectedEmployeeData = employees.filter(emp => selectedEmployees.includes(emp.wallet));
-        const headers = ['Name', 'Designation', 'Wallet Address', 'Salary (USD)', `Amount (${selectedTokenSymbol})`];
+        const headers = ['Name', 'Wallet Address', `Amount (${selectedTokenSymbol})`];
         const csvData = selectedEmployeeData.map(emp => [
-            emp.name, emp.designation, emp.wallet, parseFloat(emp.salary || '0').toFixed(2), usdToToken(emp.salary || '0')
+            emp.name, emp.wallet, usdToToken(emp.salary || '0')
         ]);
         const csvContent = [headers.join(','), ...csvData.map(row => row.join(','))].join('\n');
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -265,12 +261,12 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
         const link = document.createElement('a');
         const date = new Date().toISOString().split('T')[0];
         link.setAttribute('href', url);
-        link.setAttribute('download', `employee-payroll-${date}.csv`);
+        link.setAttribute('download', `bulk-disbursement-${date}.csv`);
         link.style.display = 'none';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        setExportNotification(`Exported ${selectedEmployees.length} employee${selectedEmployees.length !== 1 ? 's' : ''}`);
+        setExportNotification(`Exported ${selectedEmployees.length} recipient${selectedEmployees.length !== 1 ? 's' : ''}`);
         setTimeout(() => setExportNotification(''), 3000);
     };
 
@@ -281,7 +277,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
                     <div className="relative w-full lg:w-auto lg:flex-grow max-w-md">
                         <input
                             type="text"
-                            placeholder="Search employees..."
+                            placeholder="Search recipients..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full px-4 py-2 pl-10 rounded-md border border-gray-400 dark:border-gray-600 bg-white dark:bg-transparent text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
@@ -370,8 +366,8 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
                             onClick={handleExportCSV}
                             className={`px-3 py-2 bg-white dark:bg-gray-900/40 border border-gray-400 dark:border-gray-600 rounded-md text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500 flex items-center gap-2 text-sm
                                        ${selectedEmployees.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
-                            aria-label="Export selected employees"
-                            title={selectedEmployees.length === 0 ? "Select employees to export" : `Export ${selectedEmployees.length} selected employee(s)`}
+                            aria-label="Export selected recipients"
+                            title={selectedEmployees.length === 0 ? "Select recipients to export" : `Export ${selectedEmployees.length} selected recipient(s)`}
                             disabled={selectedEmployees.length === 0 || isLoading || isLoadingDerived}
                         >
                             <Download className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
@@ -489,10 +485,10 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
             )}
 
             <div className="overflow-x-auto">
-                <table className={`w-full min-w-[640px] sm:min-w-[768px] font-sans`}>
+                <table className={`w-full min-w-[800px] font-sans table-fixed`}>
                     <thead className="bg-transparent dark:text-white text-black border-b border-gray-200 dark:border-gray-700">
                         <tr>
-                            <th className="px-2 sm:px-4 py-3 w-10 sm:w-12">
+                            <th className="px-2 sm:px-4 py-3 w-12">
                                 <input
                                     type="checkbox"
                                     checked={allPaginatedSelected}
@@ -511,7 +507,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
                                         disabled:opacity-50
                                         focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500 dark:focus:ring-offset-gray-900
                                     `}
-                                    aria-label="Select all employees on this page"
+                                    aria-label="Select all recipients on this page"
                                 />
                             </th>
                             {allPossibleColumns
@@ -520,14 +516,14 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
                                     <th
                                         key={column.key}
                                         className={`px-2 sm:px-4 py-3 text-left text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap
-                                            ${column.key === 'salary' || column.key === tokenAmountColumnKey ? 'text-right' : 'text-left'}
+                                            ${column.key === tokenAmountColumnKey ? 'text-right w-32' : 'text-left'}
                                             ${column.key === 'actions' ? 'text-center w-24 sm:w-32' : ''}
+                                            ${column.key === 'name' ? 'w-48' : ''}
+                                            ${column.key === 'wallet' ? 'w-40 hidden lg:table-cell' : ''}
                                             ${(column.key === 'email' || column.key === 'company') ? 'hidden md:table-cell' : ''}
-                                            ${column.key === 'wallet' ? 'hidden lg:table-cell' : ''}
                                             `}
                                     >
-                                        {column.key === 'salary' ? 'Salary (USD)' :
-                                            column.key === tokenAmountColumnKey ? `Amount (${selectedTokenSymbol})` :
+                                        {column.key === tokenAmountColumnKey ? `Amount (${selectedTokenSymbol})` :
                                                 column.label}
                                     </th>
                                 ))}
@@ -535,20 +531,21 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-900 bg-transparent">
                         {(isLoading && paginatedEmployees.length === 0) && (
-                            <tr><td colSpan={visibleColumns.size + 1} className="px-4 py-10 text-center text-gray-500 dark:text-gray-400 text-sm sm:text-base">Loading employees...</td></tr>
+                            <tr><td colSpan={visibleColumns.size + 1} className="px-4 py-10 text-center text-gray-500 dark:text-gray-400 text-sm sm:text-base">Loading recipients...</td></tr>
                         )}
                         {(!isLoading && sortedEmployees.length === 0) && (
-                            <tr><td colSpan={visibleColumns.size + 1} className="px-4 py-10 text-center text-gray-500 dark:text-gray-400 text-sm sm:text-base">No employees added yet.</td></tr>
+                            <tr><td colSpan={visibleColumns.size + 1} className="px-4 py-10 text-center text-gray-500 dark:text-gray-400 text-sm sm:text-base">No recipients added yet.</td></tr>
                         )}
                         {(!isLoading && sortedEmployees.length > 0 && paginatedEmployees.length === 0) && (
-                            <tr><td colSpan={visibleColumns.size + 1} className="px-4 py-10 text-center text-gray-500 dark:text-gray-400 text-sm sm:text-base">No employees match your search/filters.</td></tr>
+                            <tr><td colSpan={visibleColumns.size + 1} className="px-4 py-10 text-center text-gray-500 dark:text-gray-400 text-sm sm:text-base">No recipients match your search/filters.</td></tr>
                         )}
                         {paginatedEmployees.map((employee, index) => (
                             <tr
                                 key={employee.wallet || index}
-                                className={`hover:bg-gray-100 dark:hover:bg-gray-800/20 transition-colors ${selectedEmployees.includes(employee.wallet) ? 'bg-indigo-50 dark:bg-indigo-900/30' : ''}`}
+                                className={`hover:bg-gray-100 dark:hover:bg-gray-800/20 transition-colors cursor-pointer ${selectedEmployees.includes(employee.wallet) ? 'bg-indigo-50 dark:bg-indigo-900/30' : ''}`}
+                                onClick={() => toggleEmployeeSelection(employee.wallet)}
                             >
-                                <td className="px-2 sm:px-4 py-3">
+                                <td className="px-2 sm:px-4 py-3" onClick={(e) => e.stopPropagation()}>
                                     <input
                                         type="checkbox"
                                         checked={selectedEmployees.includes(employee.wallet)}
@@ -566,7 +563,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
                                             disabled:opacity-50
                                             focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500 dark:focus:ring-offset-gray-900
                                         `}
-                                        aria-label={`Select employee ${employee.name}`}
+                                        aria-label={`Select recipient ${employee.name}`}
                                     />
                                 </td>
                                 {allPossibleColumns
@@ -575,29 +572,24 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
                                         <td
                                             key={`${employee.wallet}-${column.key}`}
                                             className={`px-2 sm:px-4 py-3 text-sm sm:text-base text-black dark:text-white whitespace-nowrap align-middle
-                                                ${column.key === 'salary' || column.key === tokenAmountColumnKey ? 'text-right font-medium' : 'text-left'}
+                                                ${column.key === tokenAmountColumnKey ? 'text-right font-medium' : 'text-left'}
                                                 ${column.key === 'actions' ? 'text-center' : ''}
                                                 ${(column.key === 'email' || column.key === 'company') ? 'hidden md:table-cell' : ''}
                                                 ${column.key === 'wallet' ? 'hidden lg:table-cell text-xs text-gray-500 dark:text-gray-400' : ''}
                                                 ${column.key === tokenAmountColumnKey ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : ''}
-                                                ${column.key === 'name' ? 'group cursor-pointer font-medium' : ''}
+                                                ${column.key === 'name' ? 'font-medium' : ''}
                                                 `}
                                             title={column.key === 'wallet' ? employee.wallet : undefined}
-                                            onClick={column.key === 'name' ? () => handleViewDetails(employee) : undefined}
                                         >
                                             {column.key === 'actions' ? (
-                                                <div className="flex justify-center space-x-1 sm:space-x-2">
-                                                    <button onClick={() => handleViewDetails(employee)} className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 p-1 rounded disabled:opacity-50" disabled={isLoading || isLoadingDerived} title="View Details"><Eye className="h-4 w-4" /></button>
-                                                    {onEditEmployee && <button onClick={() => onEditEmployee(employee)} className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-300 p-1 rounded disabled:opacity-50" disabled={isLoading || isLoadingDerived} title="Edit employee"><Edit className="h-4 w-4" /></button>}
-                                                    <button onClick={() => deleteEmployeeById(employee.wallet)} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 p-1 rounded disabled:opacity-50" disabled={isLoading || isLoadingDerived} title="Delete employee"><Trash2 className="h-4 w-4" /></button>
+                                                <div className="flex justify-center space-x-1 sm:space-x-2" onClick={(e) => e.stopPropagation()}>
+                                                    {onEditEmployee && <button onClick={() => onEditEmployee(employee)} className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-300 p-1 rounded disabled:opacity-50" disabled={isLoading || isLoadingDerived} title="Edit recipient"><Edit className="h-4 w-4" /></button>}
+                                                    <button onClick={() => deleteEmployeeById(employee.wallet)} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 p-1 rounded disabled:opacity-50" disabled={isLoading || isLoadingDerived} title="Delete recipient"><Trash2 className="h-4 w-4" /></button>
                                                 </div>
                                             ) : column.key === 'name' ? (
-                                                <div className="flex items-center gap-2 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                                                <div className="flex items-center gap-2">
                                                     {employee.name || 'N/A'}
-                                                    <Eye className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-indigo-500 dark:text-indigo-400" />
                                                 </div>
-                                            ) : column.key === 'salary' ? (
-                                                `$${parseFloat(employee.salary || '0').toFixed(2)}`
                                             ) : column.key === 'wallet' ? (
                                                 `${employee.wallet.substring(0, 6)}...${employee.wallet.substring(employee.wallet.length - 4)}`
                                             ) : column.key === tokenAmountColumnKey ? (
@@ -613,25 +605,10 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
                     {selectedEmployees.length > 0 && (
                         <tfoot>
                             <tr className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                                <td colSpan={
-                                    Array.from(visibleColumns).filter(key => key !== 'salary' && key !== tokenAmountColumnKey && key !== 'actions').length + 1
-                                }
+                                <td colSpan={visibleColumns.size + 1}
                                     className="px-2 sm:px-4 py-2 sm:py-3 text-right text-gray-600 dark:text-gray-300 font-medium text-xs sm:text-sm">
-                                    Total ({selectedEmployees.length}):
+                                    Total ({selectedEmployees.length}): {totalTokens} {selectedTokenSymbol}
                                 </td>
-                                {visibleColumns.has('salary') && (
-                                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-right text-indigo-700 dark:text-indigo-300 font-bold text-xs sm:text-sm">
-                                        ${totalUsd.toFixed(2)}
-                                    </td>
-                                )}
-                                {visibleColumns.has(tokenAmountColumnKey) && (
-                                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-right text-indigo-700 dark:text-indigo-300 font-bold text-xs sm:text-sm">
-                                        {totalTokens} {selectedTokenSymbol}
-                                    </td>
-                                )}
-                                {visibleColumns.has('actions') && (
-                                    <td className="px-2 sm:px-4 py-2 sm:py-3"></td>
-                                )}
                             </tr>
                         </tfoot>
                     )}
