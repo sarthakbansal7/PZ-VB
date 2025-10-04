@@ -230,7 +230,6 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
             isOpen={isBulkUploadOpen}
             onClose={() => setIsBulkUploadOpen(false)}
             onUploadSuccess={onUploadSuccess}
-            onRecipientsUploaded={() => {}} // No-op for individual add modal
           />
         </motion.div>
       )}
