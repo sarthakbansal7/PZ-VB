@@ -433,7 +433,7 @@ export default function Page() {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setShowBulkUploadModal(true)}
-              className="flex items-center px-3 py-1.5 text-sm bg-gray-600 hover:bg-gray-700 text-white transition-colors duration-200"
+              className="flex items-center px-3 py-1.5 text-sm bg-white hover:bg-gray-100 dark:bg-transparent dark:hover:bg-gray-900 text-black dark:text-white transition-colors duration-200 border border-gray-300 dark:border-gray-600"
             >
               <Upload className="h-4 w-4 mr-1" />
               Bulk Upload
@@ -449,7 +449,7 @@ export default function Page() {
         </div>
         
         {recipients.length === 0 ? (
-          <div className="text-center py-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+          <div className="text-center py-8">
             <Gift className="mx-auto h-10 w-10 text-gray-400 mb-3" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No recipients added yet</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -506,7 +506,7 @@ export default function Page() {
       </div>
 
       {/* Create Button */}
-      <div className="flex justify-end">
+      <div className={`flex ${recipients.length === 0 ? 'justify-center' : 'justify-end'}`}>
         <button
           onClick={() => {
             // Validate before showing confirmation
@@ -548,7 +548,7 @@ export default function Page() {
         <button
           onClick={fetchClaimableAirdrops}
           disabled={!isConnected || isCheckingClaims}
-          className="flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-md transition-colors duration-200"
+          className="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-md transition-colors duration-200"
         >
           <RefreshCw className={`h-4 w-4 mr-2 ${isCheckingClaims ? 'animate-spin' : ''}`} />
           {isCheckingClaims ? 'Checking...' : 'Refresh'}
@@ -627,20 +627,27 @@ export default function Page() {
               
               {/* Token Selector in Header */}
               <div className="flex items-center space-x-3">
-                <select
-                  value={selectedToken}
-                  onChange={(e) => handleTokenSelection(e.target.value)}
-                  className="px-3 py-1.5 text-sm border-none bg-transparent dark:bg-transparent dark:text-white text-black focus:ring-1 focus:ring-blue-500 rounded appearance-none cursor-pointer"
-                  style={{ backgroundColor: 'transparent' }}
-                >
-                  <option value="U2U" className="bg-white dark:bg-gray-900 text-black dark:text-white">U2U (Native)</option>
-                  {customTokens.map((token) => (
-                    <option key={token.symbol} value={token.symbol} className="bg-white dark:bg-gray-900 text-black dark:text-white">
-                      {token.symbol}
-                    </option>
-                  ))}
-                  <option value="add_token" className="bg-white dark:bg-gray-900 text-black dark:text-white">+ Add Token</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={selectedToken}
+                    onChange={(e) => handleTokenSelection(e.target.value)}
+                    className="px-4 py-2 pr-8 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-transparent dark:text-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg appearance-none cursor-pointer shadow-sm"
+                  >
+                    <option value="U2U" className="bg-transparent text-black dark:text-white">U2U (Native)</option>
+                    {customTokens.map((token) => (
+                      <option key={token.symbol} value={token.symbol} className="bg-white dark:bg-gray-800 text-black dark:text-white">
+                        {token.symbol}
+                      </option>
+                    ))}
+                    <option value="add_token" className="bg-white dark:bg-gray-800 text-black dark:text-white">+ Add Token</option>
+                  </select>
+                  {/* Custom dropdown arrow */}
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                    <svg className="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
                 <ConnectButton />
               </div>
             </div>
@@ -873,7 +880,7 @@ const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ isOpen, onClose, onUp
 
   return (
     <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4 shadow-xl">
+      <div className="bg-white dark:bg-black rounded-lg p-6 w-full max-w-md mx-4 shadow-xl">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-medium dark:text-white">Bulk Upload Recipients</h3>
           <button
@@ -887,7 +894,7 @@ const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ isOpen, onClose, onUp
         <div className="space-y-4">
           {/* Drop Zone */}
           <div
-            className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors relative ${
+            className={`border-2 rounded-lg p-6 text-center transition-colors relative ${
               dragActive
                 ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                 : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
@@ -1007,7 +1014,7 @@ const AddRecipientModal: React.FC<AddRecipientModalProps> = ({ isOpen, onClose, 
 
   return (
     <div className="fixed inset-0 bg-black/15 backdrop-blur-lg flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4 shadow-xl">
+      <div className="bg-white dark:bg-black rounded-lg p-6 w-full max-w-md mx-4 shadow-xl">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-lg font-medium dark:text-white">
             {editingRecipient ? 'Edit Recipient' : 'Add Recipient'}

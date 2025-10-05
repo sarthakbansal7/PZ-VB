@@ -2,9 +2,9 @@ import { getDefaultConfig, Chain } from '@rainbow-me/rainbowkit';
 
 const u2uMainnet = {
     id: 39,
-    name: 'U2U Solaris Mainnet',
+    name: 'Mainnet',
     iconUrl: 'https://u2u.xyz/favicon.ico',
-    iconBackground: 'Black',
+    iconBackground: '#ffffff',
     nativeCurrency: { name: 'U2U', symbol: 'U2U', decimals: 18 },
     rpcUrls: {
         default: { http: ['https://rpc-mainnet.u2u.xyz'] },
@@ -16,9 +16,9 @@ const u2uMainnet = {
 
 const u2uTestnet = {
     id: 2484,
-    name: 'Unicorn Ultra Nebulas Testnet',
+    name: 'Testnet',
     iconUrl: 'https://u2u.xyz/favicon.ico',
-    iconBackground: 'Black',
+    iconBackground: '#ffffff',
     nativeCurrency: { name: 'U2U', symbol: 'U2U', decimals: 18 },
     rpcUrls: {
         default: { http: ['https://rpc-nebulas-testnet.u2u.xyz'] },
