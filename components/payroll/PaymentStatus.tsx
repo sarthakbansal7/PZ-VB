@@ -282,7 +282,7 @@ const PaymentStatus = ({
                             <p className="font-medium mb-1 ">Payment successful!</p>
                             <p className="dark:text-gray-300 text-gray-700 ">
                                 {selectedEmployeesCount > 0
-                                    ? `${selectedEmployeesCount} employee${selectedEmployeesCount !== 1 ? 's' : ''} paid successfully`
+                                    ? `${selectedEmployeesCount} recipient${selectedEmployeesCount !== 1 ? 's' : ''} paid successfully`
                                     : 'Transaction completed successfully'}
                             </p>
                         </div>

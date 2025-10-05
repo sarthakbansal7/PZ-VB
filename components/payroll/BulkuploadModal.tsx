@@ -395,7 +395,7 @@ const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ isOpen, onClose, onUp
                     <div className="flex-1">
                       <p className="text-black dark:text-white font-medium text-sm sm:text-base mb-1.5 sm:mb-2">Important Guidelines</p>
                       <ul className="list-disc pl-4 sm:pl-5 space-y-1 text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
-                        <li>Required fields: name, email, designation, salary, wallet</li>
+                        <li>Required fields: name, wallet, amount</li>
                         <li>Wallet addresses must be valid Ethereum addresses</li>
                         <li>Maximum 100 recipients per upload</li>
                         <li>File size should not exceed 5MB</li>
