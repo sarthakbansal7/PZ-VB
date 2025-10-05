@@ -7,8 +7,8 @@ import {
 export const NATIVE_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 export const contractMainnetAddresses = {
-    [u2uMainnet.id]: '0x2c137aC6Bc804A9F798053347802F489F0025768',
-    [u2uTestnet.id]: '0x2c137aC6Bc804A9F798053347802F489F0025768',
+    [u2uMainnet.id]: '0x071A4FCcEEe657c8d4729F664957e1777f6A719E',
+    [u2uTestnet.id]: '0x071A4FCcEEe657c8d4729F664957e1777f6A719E',
 };
 
 // Token interface with optional priceFeed field
