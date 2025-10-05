@@ -7,14 +7,16 @@ import PaymentDashboard from "@/components/payroll/PaymentDashboard";
 import EmployeeTable2 from "@/components/payroll/EmployeeTable2";
 import AddEmployeeModal2 from "@/components/payroll/AddEmployeeModal2";
 import BulkuploadModal2 from "@/components/payroll/BulkuploadModal2";
+import { CsvDownloadModal } from "@/components/payroll/CsvDownloadModal";
 import { Employee, PayrollData } from "@/lib/interfaces";
+import { generatePaymentCsv } from "@/lib/csv-utils";
 import { toast } from "react-hot-toast";
 import { parseUnits } from 'ethers';
-import { getBulkTransferAddress, NATIVE_TOKEN_ADDRESS } from '@/lib/contract-addresses';
+import { getPayrollAddress, NATIVE_TOKEN_ADDRESS } from '@/lib/contract-addresses';
 import { contractMainnetAddresses as transferContract } from '@/lib/evm-tokens-mainnet';
 import { allMainnetChains as chains, NATIVE_ADDRESS } from '@/lib/evm-chains-mainnet';
 import { tokensPerMainnetChain as tokens } from '@/lib/evm-tokens-mainnet';
-import transferAbi from '@/lib/Transfer.json';
+import payrollAbi from '@/lib/PayrollAbi.json';
 import { erc20Abi } from 'viem';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useConfig } from 'wagmi';
 import { waitForTransactionReceipt } from "@wagmi/core";
@@ -51,11 +53,12 @@ const PaymentsPage: React.FC = () => {
   const [selectedChain, setSelectedChain] = useState(chains[0]);
   const [selectedToken, setSelectedToken] = useState(tokens[chains[0].id][0]);
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined);
+  const [showCsvDownloadModal, setShowCsvDownloadModal] = useState(false);
 
   // Get transfer contract address for current chain
   const getTransferContract = () => {
     // First try to get from the new contract addresses configuration
-    const contractAddress = getBulkTransferAddress(selectedChain.id);
+    const contractAddress = getPayrollAddress(selectedChain.id);
     if (contractAddress) {
       return contractAddress;
     }
@@ -210,6 +213,37 @@ const PaymentsPage: React.FC = () => {
     };
   };
 
+  // CSV download handlers
+  const handleCsvDownload = () => {
+    const selectedEmployeeData = employees.filter(emp => selectedEmployees.includes(emp.wallet));
+    const { amounts } = getRecipientsAndAmounts();
+    const amountsStr = amounts.map(amount => amount.toString());
+    
+    generatePaymentCsv(
+      selectedEmployeeData,
+      {
+        symbol: selectedToken.symbol,
+        address: selectedToken.address,
+        decimals: selectedToken.decimals
+      },
+      amountsStr
+    );
+    
+    toast.success('CSV file downloaded successfully');
+    setShowCsvDownloadModal(false);
+    processPayment(); // Continue with payment after download
+  };
+
+  const handleContinueWithoutCsv = () => {
+    setShowCsvDownloadModal(false);
+    processPayment(); // Continue with payment without download
+  };
+
+  const handleCloseCsvModal = () => {
+    setShowCsvDownloadModal(false);
+    // Don't process payment if user closes modal
+  };
+
   // Get block explorer URL based on chain
   const getExplorerUrl = (txHash: `0x${string}` | undefined): string => {
     const explorer = selectedChain.blockExplorers?.default?.url;
@@ -272,49 +306,29 @@ const PaymentsPage: React.FC = () => {
     totalAmount: bigint
   ) => {
     setIsSending(true);
-    console.log('Sending final transaction...');
+    console.log('Sending payroll transaction with native U2U token...');
 
     try {
-      // For native token transfers
-      if (selectedToken.address === NATIVE_ADDRESS) {
-        console.log('Sending native token transfer');
-        const finalTxHash = await writeContractAsync({
-          address: transferContractAddress as `0x${string}`,
-          abi: transferAbi.abi,
-          functionName: 'bulkTransfer',
-          args: [
-            NATIVE_TOKEN_ADDRESS, // Use 0x00 address for native token
-            recipients,
-            amounts
-          ],
-          value: totalAmount,
-          gas: BigInt(400000),
-          chainId: selectedChain.id
-        });
+      // Always use native token transfer (address(0))
+      console.log('Sending native U2U token transfer via payroll contract');
+      const finalTxHash = await writeContractAsync({
+        address: transferContractAddress as `0x${string}`,
+        abi: payrollAbi.abi,
+        functionName: 'bulkTransfer',
+        args: [
+          NATIVE_TOKEN_ADDRESS, // Use address(0) for native token
+          recipients,
+          amounts
+        ],
+        value: totalAmount,
+        gas: BigInt(400000),
+        chainId: selectedChain.id
+      });
 
-        // Set the state and log immediately with the correct hash
-        setTxHash(finalTxHash);
-        await logPayrollTransaction(finalTxHash);
-      } else {
-        // For ERC20 token transfers
-        console.log('Sending ERC20 token transfer');
-        const finalTxHash = await writeContractAsync({
-          address: transferContractAddress as `0x${string}`,
-          abi: transferAbi.abi,
-          functionName: 'bulkTransfer',
-          args: [
-            selectedToken.address as `0x${string}`,
-            recipients,
-            amounts
-          ],
-          gas: BigInt(400000),
-          chainId: selectedChain.id
-        });
-
-        // Set the state and log immediately with the correct hash
-        setTxHash(finalTxHash);
-        await logPayrollTransaction(finalTxHash);
-      }
+      // Set the state and log immediately with the correct hash
+      setTxHash(finalTxHash);
+      await logPayrollTransaction(finalTxHash);
+      
       console.log('Transaction sent successfully');
     } catch (error) {
       console.error('Error in sendTransactionAfterApproval:', error);
@@ -343,12 +357,19 @@ const PaymentsPage: React.FC = () => {
   // Main transaction handling function
   const handleTransaction = async () => {
     setTxError(''); // Clear previous errors immediately on new attempt
-    setShowPaymentStatus(true);
 
     if (selectedEmployees.length === 0) {
       setTxError('Please select at least one employee to pay');
       return;
     }
+
+    // Show CSV download modal before processing payment
+    setShowCsvDownloadModal(true);
+  };
+
+  // Process payment after CSV modal interaction
+  const processPayment = async () => {
+    setShowPaymentStatus(true);
 
     try {
       const transferContractAddress = getTransferContract();
@@ -361,41 +382,8 @@ const PaymentsPage: React.FC = () => {
       const { recipients, amounts } = getRecipientsAndAmounts();
       const totalAmount = amounts.reduce((sum, amount) => sum + amount, BigInt(0));
 
-      // For ERC20 tokens that need approval
-      if (selectedToken.address !== NATIVE_ADDRESS && needsApproval) {
-        setIsApproving(true);
-
-        try {
-          const approvalHash = await writeContractAsync({
-            address: selectedToken.address as `0x${string}`,
-            abi: erc20Abi,
-            functionName: 'approve',
-            args: [transferContractAddress as `0x${string}`, totalAmount],
-            chainId: selectedChain.id,
-            gas: BigInt(400000)
-          });
-
-          setApprovalTxHash(approvalHash);
-
-          const approvalReceipt = await waitForTransactionReceipt(config, {
-            chainId: selectedChain.id,
-            hash: approvalHash
-          });
-
-          if (approvalReceipt.status !== 'success') {
-            throw new Error('Approval transaction failed');
-          }
-
-          setIsApproving(false);
-          await sendTransactionAfterApproval(transferContractAddress, recipients, amounts, totalAmount);
-        } catch (error: any) {
-          setIsApproving(false);
-          setTxError(error.message || 'Approval failed');
-          return;
-        }
-      } else {
-        await sendTransactionAfterApproval(transferContractAddress, recipients, amounts, totalAmount);
-      }
+      // Force native token usage - skip approval and directly send transaction
+      await sendTransactionAfterApproval(transferContractAddress, recipients, amounts, totalAmount);
     } catch (error: any) {
       setIsSending(false);
       setTxError(error.message || 'Transaction failed');
@@ -563,6 +551,17 @@ const PaymentsPage: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* CSV Download Modal */}
+        <CsvDownloadModal
+          isOpen={showCsvDownloadModal}
+          onClose={handleCloseCsvModal}
+          onDownload={handleCsvDownload}
+          onContinue={handleContinueWithoutCsv}
+          selectedEmployees={employees.filter(emp => selectedEmployees.includes(emp.wallet))}
+          selectedToken={selectedToken}
+          totalAmount={selectedEmployees.length > 0 ? calculateTotalAmount().toString() : '0'}
+        />
       </div>
     </div>
   );

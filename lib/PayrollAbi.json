@@ -1,0 +1,27 @@
+{
+  "abi": [
+    {
+      "type": "function",
+      "name": "bulkTransfer",
+      "inputs": [
+        {
+          "name": "token",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "recipients",
+          "type": "address[]",
+          "internalType": "address[]"
+        },
+        {
+          "name": "amounts",
+          "type": "uint256[]",
+          "internalType": "uint256[]"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "payable"
+    }
+  ]
+}
