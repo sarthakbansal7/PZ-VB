@@ -4,11 +4,13 @@ import React, { useState, useEffect } from "react";
 import PaymentsHeader from "@/components/payroll/PaymentHeader";
 import ConfigurePayModal from "@/components/payroll/ConfigurePayModal";
 import PaymentDashboard from "@/components/payroll/PaymentDashboard";
-import AddEmployeeModal from "@/components/payroll/AddEmployeeModal";
-import BulkUploadModal from "@/components/payroll/BulkuploadModal";
+import EmployeeTable2 from "@/components/payroll/EmployeeTable2";
+import AddEmployeeModal2 from "@/components/payroll/AddEmployeeModal2";
+import BulkuploadModal2 from "@/components/payroll/BulkuploadModal2";
 import { Employee, PayrollData } from "@/lib/interfaces";
 import { toast } from "react-hot-toast";
 import { parseUnits } from 'ethers';
+import { getBulkTransferAddress, NATIVE_TOKEN_ADDRESS } from '@/lib/contract-addresses';
 import { contractMainnetAddresses as transferContract } from '@/lib/evm-tokens-mainnet';
 import { allMainnetChains as chains, NATIVE_ADDRESS } from '@/lib/evm-chains-mainnet';
 import { tokensPerMainnetChain as tokens } from '@/lib/evm-tokens-mainnet';
@@ -52,6 +54,12 @@ const PaymentsPage: React.FC = () => {
 
   // Get transfer contract address for current chain
   const getTransferContract = () => {
+    // First try to get from the new contract addresses configuration
+    const contractAddress = getBulkTransferAddress(selectedChain.id);
+    if (contractAddress) {
+      return contractAddress;
+    }
+    // Fallback to the old configuration
     return transferContract[selectedChain.id];
   };
   // Wallet and transaction hooks
@@ -106,26 +114,8 @@ const PaymentsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    // Initialize with mock data instead of fetching from backend
-    const mockEmployees: Employee[] = [
-      {
-        wallet: "0x1234567890123456789012345678901234567890",
-        name: "John Doe",
-        email: "john.doe@example.com",
-        salary: "5000",
-        designation: "Software Engineer",
-        company: "Demo Company"
-      },
-      {
-        wallet: "0x2345678901234567890123456789012345678901",
-        name: "Jane Smith", 
-        email: "jane.smith@example.com",
-        salary: "6000",
-        designation: "Product Manager",
-        company: "Demo Company"
-      }
-    ];
-    setEmployees(mockEmployees);
+    // Initialize with empty data - no demo employees
+    setEmployees([]);
     setIsLoading(false);
 
     // Set company name
@@ -191,9 +181,16 @@ const PaymentsPage: React.FC = () => {
 
   // Calculate total amount needed for selected employees
   const calculateTotalAmount = () => {
-    return employees
+    const totalUsd = employees
       .filter(emp => selectedEmployees.includes(emp.wallet))
       .reduce((sum, emp) => sum + parseFloat(emp.salary), 0);
+    
+    const totalTokenAmount = usdToToken(totalUsd.toString());
+    // For U2U chain (id 39) and native token, ensure we use 18 decimals
+    const decimals = selectedChain.id === 39 && selectedToken.address === NATIVE_ADDRESS 
+      ? 18 
+      : selectedToken.decimals;
+    return parseUnits(totalTokenAmount, decimals);
   };
 
   // Get recipients and amounts for selected employees
@@ -204,7 +201,11 @@ const PaymentsPage: React.FC = () => {
       recipients: selectedEmployeeData.map(emp => emp.wallet as `0x${string}`),
       amounts: selectedEmployeeData.map(emp => {
         const tokenAmount = usdToToken(emp.salary);
-        return parseUnits(tokenAmount, selectedToken.decimals);
+        // For U2U chain (id 39) and native token, ensure we use 18 decimals
+        const decimals = selectedChain.id === 39 && selectedToken.address === NATIVE_ADDRESS 
+          ? 18 
+          : selectedToken.decimals;
+        return parseUnits(tokenAmount, decimals);
       })
     };
   };
@@ -235,8 +236,7 @@ const PaymentsPage: React.FC = () => {
     ) {
       try {
         const totalAmount = calculateTotalAmount();
-        const parsedAmount = parseUnits(usdToToken(totalAmount.toString()), selectedToken.decimals);
-        setNeedsApproval(allowance < parsedAmount);
+        setNeedsApproval(allowance < totalAmount);
       } catch (e) {
         // Invalid amount format, ignore
       }
@@ -283,7 +283,7 @@ const PaymentsPage: React.FC = () => {
           abi: transferAbi.abi,
           functionName: 'bulkTransfer',
           args: [
-            NATIVE_ADDRESS, // Native token
+            NATIVE_TOKEN_ADDRESS, // Use 0x00 address for native token
             recipients,
             amounts
           ],
@@ -481,47 +481,27 @@ const PaymentsPage: React.FC = () => {
           onAddEmployee={handleAddEmployeeClick}
           onBulkUpload={handleBulkUploadClick} />
 
-        <PaymentDashboard
-          exchangeRate={exchangeRate}
-          selectedTokenSymbol={selectedTokenSymbol}
+        <EmployeeTable2
           employees={employees}
-          isConnected={isConnected}
           selectedEmployees={selectedEmployees}
           toggleEmployeeSelection={toggleEmployeeSelection}
-          toggleAllEmployees={toggleAllEmployees}
-          allEmployeesSelected={allEmployeesSelected}
-          handleTransaction={handleTransaction}
           usdToToken={usdToToken}
+          selectedTokenSymbol={selectedTokenSymbol}
+          isLoading={isLoading}
+          deleteEmployeeById={(wallet: string) => {
+            setWalletToDelete(wallet);
+            setIsDeleteDialogOpen(true);
+          }}
+          onEditEmployee={handleEditEmployee}
+          exchangeRate={exchangeRate}
+          handleTransaction={handleTransaction}
           isLoadingDerived={isLoadingDerived}
           needsApproval={needsApproval}
           isApproving={isApproving}
           isSending={isSending}
           isWritePending={isWritePending}
           isTxLoading={isTxLoading}
-          isTxSuccess={isTxSuccess}
-          isTxError={isTxError}
-          txHash={txHash}
-          txError={txError}
-          approvalTxHash={approvalTxHash}
-          showPaymentStatus={showPaymentStatus}
-          hasTransactionActivity={hasTransactionActivity}
-          getExplorerUrl={getExplorerUrl}
           selectedToken={selectedToken}
-          handleAddEmployeeClick={handleAddEmployeeClick}
-          handleEditEmployee={handleEditEmployee}
-          deleteEmployeeById={(wallet: string) => {
-            setWalletToDelete(wallet);
-            setIsDeleteDialogOpen(true);
-          }}
-          selectedChain={selectedChain}
-          handleAutoClose={() => {
-            setShowPaymentStatus(false);
-            setApprovalTxHash(undefined);
-            setTxError('');
-            setCustomTxHash(undefined);
-            setTxHash(undefined);
-            setSelectedEmployees([]);
-          }}
         />
 
         <ConfigurePayModal
@@ -530,7 +510,7 @@ const PaymentsPage: React.FC = () => {
           onExchangeRateUpdate={handleExchangeRateUpdate}
         />
 
-        <AddEmployeeModal
+        <AddEmployeeModal2
           isOpen={showAddModal}
           onClose={() => {
             setShowAddModal(false);
@@ -540,15 +520,18 @@ const PaymentsPage: React.FC = () => {
           onUpdateEmployee={handleUpdateEmployee}
           editEmployee={selectedEmployee}
           onUploadSuccess={() => {
-            setShowBulkUploadModal(false);
+            setShowBulkUploadModal(true);
           }}
         />
 
-        <BulkUploadModal
+        <BulkuploadModal2
           isOpen={showBulkUploadModal}
           onClose={() => setShowBulkUploadModal(false)}
           onUploadSuccess={() => {
             setShowBulkUploadModal(false);
+          }}
+          onEmployeesUploaded={(newEmployees: any[]) => {
+            setEmployees(prev => [...prev, ...newEmployees]);
           }}
         />
 
