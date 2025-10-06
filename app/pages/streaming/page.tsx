@@ -158,6 +158,7 @@ export default function Page() {
   const [streamName, setStreamName] = useState<string>('')
   const [streamDescription, setStreamDescription] = useState<string>('')
   const [defaultDuration, setDefaultDuration] = useState<string>('24') // hours
+  const [durationUnit, setDurationUnit] = useState<'minutes' | 'hours' | 'days' | 'months'>('hours')
   const [startImmediately, setStartImmediately] = useState<boolean>(true)
   const [scheduledStartDate, setScheduledStartDate] = useState<string>('')
   const [streamType, setStreamType] = useState<'linear' | 'cliff' | 'custom'>('linear')
@@ -192,6 +193,29 @@ export default function Page() {
       enabled: !!address && !!streamContractAddress,
     },
   })
+
+  // Helper function to convert duration to hours
+  const convertDurationToHours = (duration: string, unit: 'minutes' | 'hours' | 'days' | 'months'): number => {
+    const value = parseFloat(duration) || 0
+    switch (unit) {
+      case 'minutes': return value / 60
+      case 'hours': return value
+      case 'days': return value * 24
+      case 'months': return value * 24 * 30 // Approximate 30 days per month
+      default: return value
+    }
+  }
+
+  // Helper function to get duration display text
+  const getDurationDisplayText = (unit: 'minutes' | 'hours' | 'days' | 'months'): string => {
+    switch (unit) {
+      case 'minutes': return 'Minutes'
+      case 'hours': return 'Hours'
+      case 'days': return 'Days'
+      case 'months': return 'Months'
+      default: return 'Hours'
+    }
+  }
 
   // Set mounted state after hydration
   useEffect(() => {
@@ -236,6 +260,18 @@ export default function Page() {
     }, 0);
     setTotalAmount(total.toFixed(6));
   }, [recipients]);
+
+  // Update all recipients' duration when default duration changes
+  useEffect(() => {
+    if (recipients.length > 0) {
+      setRecipients(prevRecipients => 
+        prevRecipients.map(recipient => ({
+          ...recipient,
+          duration: defaultDuration
+        }))
+      );
+    }
+  }, [defaultDuration]);
 
   // Mock function to fetch stream history
   const fetchStreamHistory = async () => {
@@ -822,7 +858,10 @@ export default function Page() {
         const decimals = selectedToken === 'U2U' ? 18 : 18 // You can extend this for different tokens
         return parseUnits(r.amount, decimals)
       })
-      const durations = validRecipients.map(r => BigInt(parseInt(r.duration || defaultDuration) * 3600)) // Convert hours to seconds
+      const durations = validRecipients.map(r => {
+        const durationInHours = convertDurationToHours(r.duration || defaultDuration, durationUnit)
+        return BigInt(Math.round(durationInHours * 3600)) // Convert hours to seconds
+      })
       
       // Determine token address - use native address for U2U, otherwise use custom token address
       const tokenAddress = selectedToken === 'U2U' ? NATIVE_TOKEN_ADDRESS : 
@@ -907,7 +946,7 @@ export default function Page() {
     <div className="space-y-6">
       {/* Stream Configuration Section */}
       <div className="bg-white/5 dark:bg-gray-800/10 backdrop-blur-sm rounded-xl p-6 border border-white/10 dark:border-gray-700/30">
-        <h3 className="text-lg font-semibold dark:text-white mb-4 flex items-center">
+        <h3 className="text-lg font-semibold text-black dark:text-white mb-4 flex items-center">
           <Settings className="h-5 w-5 mr-2 text-blue-500" />
           Stream Configuration
         </h3>
@@ -923,23 +962,36 @@ export default function Page() {
               value={streamName}
               onChange={(e) => setStreamName(e.target.value)}
               placeholder="Enter stream name"
-              className="w-full px-3 py-2 border border-white/20 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+              className="w-full px-3 py-2 border border-gray-400/60 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white caret-black dark:caret-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
             />
           </div>
 
           {/* Stream Duration */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Duration (Hours)
+              Duration
             </label>
-            <input
-              type="number"
-              value={defaultDuration}
-              onChange={(e) => setDefaultDuration(e.target.value)}
-              placeholder="24"
-              min="1"
-              className="w-full px-3 py-2 border border-white/20 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
-            />
+            <div className="flex space-x-2">
+              <input
+                type="number"
+                value={defaultDuration}
+                onChange={(e) => setDefaultDuration(e.target.value)}
+                placeholder="24"
+                min="1"
+                className="flex-1 px-3 py-2 border border-gray-400/60 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white caret-black dark:caret-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                autoComplete="off"
+              />
+              <select
+                value={durationUnit}
+                onChange={(e) => setDurationUnit(e.target.value as 'minutes' | 'hours' | 'days' | 'months')}
+                className="px-3 py-2 border border-gray-400/60 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[100px]"
+              >
+                <option value="minutes" className="bg-white/90 dark:bg-gray-800/90 text-black dark:text-white">Minutes</option>
+                <option value="hours" className="bg-white/90 dark:bg-gray-800/90 text-black dark:text-white">Hours</option>
+                <option value="days" className="bg-white/90 dark:bg-gray-800/90 text-black dark:text-white">Days</option>
+                <option value="months" className="bg-white/90 dark:bg-gray-800/90 text-black dark:text-white">Months</option>
+              </select>
+            </div>
           </div>
 
           {/* Stream Type - Full Width */}
@@ -1108,7 +1160,8 @@ export default function Page() {
                 onChange={(e) => setCliffPeriod(e.target.value)}
                 placeholder="0"
                 min="0"
-                className="w-full px-3 py-2 border border-white/20 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                className="w-full px-3 py-2 border border-gray-400/60 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white caret-black dark:caret-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                autoComplete="off"
               />
             </div>
           )}
@@ -1124,7 +1177,7 @@ export default function Page() {
             onChange={(e) => setStreamDescription(e.target.value)}
             placeholder="Describe the purpose of this stream..."
             rows={3}
-            className="w-full px-3 py-2 border border-white/20 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 dark:placeholder:text-gray-400 resize-none"
+            className="w-full px-3 py-2 border border-gray-400/60 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white caret-black dark:caret-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 dark:placeholder:text-gray-400 resize-none"
           />
         </div>
 
@@ -1175,7 +1228,7 @@ export default function Page() {
       {/* Recipients Section */}
       <div className="bg-white/5 dark:bg-gray-800/10 backdrop-blur-sm rounded-xl p-6 border border-white/10 dark:border-gray-700/30">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold dark:text-white flex items-center">
+          <h3 className="text-lg font-semibold text-black dark:text-white flex items-center">
             <Target className="h-5 w-5 mr-2 text-blue-500" />
             Stream Recipients ({recipients.length})
           </h3>
@@ -1206,11 +1259,11 @@ export default function Page() {
         ) : (
           <div className="space-y-0 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
             <div className="grid grid-cols-5 gap-6 px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-transparent backdrop-blur-sm">
-              <div className="text-sm font-semibold text-gray-600 dark:text-gray-300">Recipient Address</div>
-              <div className="text-sm font-semibold text-gray-600 dark:text-gray-300">Amount ({selectedToken})</div>
-              <div className="text-sm font-semibold text-gray-600 dark:text-gray-300">Duration (Hours)</div>
-              <div className="text-sm font-semibold text-gray-600 dark:text-gray-300">Flow Rate</div>
-              <div className="text-sm font-semibold text-gray-600 dark:text-gray-300 text-right">Actions</div>
+              <div className="text-sm font-semibold text-black dark:text-gray-300">Recipient Address</div>
+              <div className="text-sm font-semibold text-black dark:text-gray-300">Amount ({selectedToken})</div>
+              <div className="text-sm font-semibold text-black dark:text-gray-300">Duration (Hours)</div>
+              <div className="text-sm font-semibold text-black dark:text-gray-300">Flow Rate</div>
+              <div className="text-sm font-semibold text-black dark:text-gray-300 text-right">Actions</div>
             </div>
             
             {recipients.map((recipient, index) => {
@@ -1220,14 +1273,14 @@ export default function Page() {
               
               return (
                 <div key={index} className="grid grid-cols-5 gap-6 px-6 py-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
-                  <div className="text-sm font-mono text-gray-600 dark:text-gray-300 truncate">
+                  <div className="text-sm font-mono text-black dark:text-gray-300 truncate">
                     {recipient.address || 'Not set'}
                   </div>
                   <div className="text-sm font-medium">
                     {recipient.amount || '0'} {selectedToken}
                   </div>
                   <div className="text-sm">
-                    {recipient.duration || defaultDuration} hours
+                    {recipient.duration || defaultDuration} {getDurationDisplayText(durationUnit).toLowerCase()}
                   </div>
                   <div className="text-sm text-blue-600 dark:text-blue-400">
                     {flowRate} {selectedToken}/hr
@@ -1261,12 +1314,12 @@ export default function Page() {
         {recipients.length > 0 && (
           <div className="mt-4 p-4 bg-transparent border border-white/20 dark:border-gray-600/30 rounded-lg backdrop-blur-sm">
             <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600 dark:text-gray-300">Total Recipients:</span>
-              <span className="font-semibold">{recipients.length}</span>
+              <span className="text-black dark:text-gray-300">Total Recipients:</span>
+              <span className="font-semibold text-black dark:text-white">{recipients.length}</span>
             </div>
             <div className="flex justify-between items-center text-sm mt-1">
-              <span className="text-gray-600 dark:text-gray-300">Total Amount:</span>
-              <span className="font-semibold">{totalAmount} {selectedToken}</span>
+              <span className="text-black dark:text-gray-300">Total Amount:</span>
+              <span className="font-semibold text-black dark:text-white">{totalAmount} {selectedToken}</span>
             </div>
           </div>
         )}
@@ -1299,7 +1352,7 @@ export default function Page() {
   const ClaimStreamContent = () => (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-xl font-semibold dark:text-white flex items-center">
+        <h3 className="text-xl font-semibold text-black dark:text-white flex items-center">
           <Activity className="h-6 w-6 mr-2 text-blue-500" />
           Active Streams
         </h3>
@@ -1369,7 +1422,7 @@ export default function Page() {
                   />
                   <div>
                     <div className="flex items-center space-x-3">
-                      <h4 className="text-lg font-semibold dark:text-white">
+                      <h4 className="text-lg font-semibold text-black dark:text-white">
                         Stream #{stream.streamId.toString()}
                       </h4>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(stream.status)}`}>
@@ -1446,7 +1499,7 @@ export default function Page() {
           <div className="w-full max-w-6xl mb-6">
             {/* Header with Title and Token Selector */}
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-3xl font-bold text-black dark:text-white flex items-center">
+              <h1 className="text-2xl font-bold text-black dark:text-white flex items-center">
                 
                 Token Streaming
               </h1>
@@ -1485,7 +1538,7 @@ export default function Page() {
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center ${
                   activeTab === 'create'
                     ? 'bg-white/20 dark:bg-gray-700/50 shadow-md text-black dark:text-white border border-white/20 dark:border-gray-600'
-                    : 'text-gray-600 dark:text-gray-300 hover:bg-white/10 dark:hover:bg-gray-800/30'
+                    : 'text-black dark:text-gray-300 hover:bg-white/10 dark:hover:bg-gray-800/30'
                 }`}
               >
                 <Play className="h-4 w-4 mr-1.5" />
@@ -1496,7 +1549,7 @@ export default function Page() {
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center ${
                   activeTab === 'claim'
                     ? 'bg-white/20 dark:bg-gray-700/50 shadow-md text-black dark:text-white border border-white/20 dark:border-gray-600'
-                    : 'text-gray-600 dark:text-gray-300 hover:bg-white/10 dark:hover:bg-gray-800/30'
+                    : 'text-black dark:text-gray-300 hover:bg-white/10 dark:hover:bg-gray-800/30'
                 }`}
               >
                 <DollarSign className="h-4 w-4 mr-1.5" />
@@ -1530,7 +1583,7 @@ export default function Page() {
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-black dark:text-white">
                 Connect Your Wallet
               </h2>
-              <p className="text-gray-600 dark:text-gray-300 text-base sm:text-lg max-w-md mx-auto">
+              <p className="text-black dark:text-gray-300 text-base sm:text-lg max-w-md mx-auto">
                 Connect your wallet to access streaming features and manage your token streams.
               </p>
             </div>
@@ -1545,8 +1598,8 @@ export default function Page() {
       {/* Add Recipient Modal */}
       {showAddRecipientModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-black/90 backdrop-blur-md rounded-xl p-6 w-full max-w-md mx-4 border border-white/20">
-            <h3 className="text-lg font-semibold mb-4 dark:text-white">
+          <div className="bg-white dark:bg-black/90 backdrop-blur-md rounded-xl p-6 w-full max-w-md mx-4 border border-gray-200 dark:border-white/20">
+            <h3 className="text-lg font-semibold mb-4 text-black dark:text-white">
               {editingIndex !== null ? 'Edit Recipient' : 'Add Recipient'}
             </h3>
             
@@ -1560,7 +1613,7 @@ export default function Page() {
                   value={newRecipientAddress}
                   onChange={(e) => setNewRecipientAddress(e.target.value)}
                   placeholder="0x..."
-                  className="w-full px-3 py-2 border border-white/20 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  className="w-full px-3 py-2 border border-gray-400/60 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white caret-black dark:caret-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 />
               </div>
               
@@ -1575,12 +1628,12 @@ export default function Page() {
                   placeholder="0.0"
                   min="0"
                   step="0.000001"
-                  className="w-full px-3 py-2 border border-white/20 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  className="w-full px-3 py-2 border border-gray-400/60 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white caret-black dark:caret-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 />
               </div>
               
               <div className="text-sm text-gray-600 dark:text-gray-400">
-                Duration: {defaultDuration} hours (uses stream default)
+                Duration: {defaultDuration} {getDurationDisplayText(durationUnit).toLowerCase()} (uses stream default)
               </div>
             </div>
             
@@ -1592,7 +1645,7 @@ export default function Page() {
                   setNewRecipientAmount('')
                   setEditingIndex(null)
                 }}
-                className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                className="px-4 py-2 text-black dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
               >
                 Cancel
               </button>
@@ -1610,8 +1663,8 @@ export default function Page() {
       {/* Bulk Upload Modal */}
       {showBulkUploadModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-black/90 backdrop-blur-md rounded-xl p-6 w-full max-w-lg mx-4 border border-white/20">
-            <h3 className="text-lg font-semibold mb-4 dark:text-white">
+          <div className="bg-white dark:bg-black/90 backdrop-blur-md rounded-xl p-6 w-full max-w-lg mx-4 border border-gray-200 dark:border-white/20">
+            <h3 className="text-lg font-semibold mb-4 text-black dark:text-white">
               Bulk Upload Recipients
             </h3>
             
@@ -1640,7 +1693,7 @@ export default function Page() {
                   type="file"
                   accept=".csv"
                   onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
-                  className="w-full px-3 py-2 border border-white/20 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-400/60 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white caret-black dark:caret-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
                 {csvFile && (
                   <p className="text-sm text-green-600 dark:text-green-400 mt-1">
@@ -1677,7 +1730,7 @@ export default function Page() {
                   setBulkUploadData('')
                   setCsvFile(null)
                 }}
-                className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                className="px-4 py-2 text-black dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
               >
                 Cancel
               </button>
@@ -1696,8 +1749,8 @@ export default function Page() {
       {/* Custom Token Modal */}
       {showCustomTokenModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-black/90 backdrop-blur-md rounded-xl p-6 w-full max-w-md mx-4 border border-white/20">
-            <h3 className="text-lg font-semibold mb-4 dark:text-white">
+          <div className="bg-white dark:bg-black/90 backdrop-blur-md rounded-xl p-6 w-full max-w-md mx-4 border border-gray-200 dark:border-white/20">
+            <h3 className="text-lg font-semibold mb-4 text-black dark:text-white">
               Add Custom Token
             </h3>
             
@@ -1730,7 +1783,7 @@ export default function Page() {
             <div className="flex justify-end space-x-3 mt-6">
               <button
                 onClick={() => setShowCustomTokenModal(false)}
-                className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                className="px-4 py-2 text-black dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
               >
                 Cancel
               </button>
