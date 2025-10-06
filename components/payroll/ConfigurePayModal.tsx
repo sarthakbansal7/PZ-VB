@@ -10,7 +10,6 @@ import { allMainnetChains as chains } from '@/lib/evm-chains-mainnet';
 import { tokensPerMainnetChain as tokens, Token } from '@/lib/evm-tokens-mainnet';
 import { getExchangeRate, getU2UPrice } from '@/lib/chainlink-helper';
 import { ethers } from 'ethers';
-import { CardSpotlight } from "../ui/cardSpotlight";
 
 interface ConfigurePayModalProps {
   isOpen: boolean;
@@ -305,7 +304,7 @@ const ConfigurePayModal: React.FC<ConfigurePayModalProps> = ({
           onClick={onClose}
         >
           <div className="relative w-full min-h-full flex items-center justify-center py-6">
-            <CardSpotlight className="dark:bg-black/60 border border-gray-200">
+            <div className="dark:bg-black/60 bg-white/90 border border-gray-200 dark:border-gray-800 rounded-xl backdrop-blur-sm shadow-2xl">
               <motion.div
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -320,7 +319,7 @@ const ConfigurePayModal: React.FC<ConfigurePayModalProps> = ({
                       <div className="p-2 sm:p-2.5 rounded-full bg-gray-100 dark:bg-gray-800/20 shadow-inner shadow-gray-200/50 dark:shadow-gray-700/10">
                         <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 dark:text-gray-300" />
                       </div>
-                      <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-black/70 dark:text-white tracking-tight">
+                      <h2 className="text-sm sm:text-base md:text-lg font-bold text-black/70 dark:text-white tracking-tight">
                         Configure Payments
                       </h2>
                     </div>
@@ -579,7 +578,7 @@ const ConfigurePayModal: React.FC<ConfigurePayModalProps> = ({
                   </div>
                 </div>
               </motion.div>
-            </CardSpotlight>
+            </div>
           </div>
         </motion.div>
       </AnimatePresence >
@@ -592,7 +591,7 @@ const ConfigurePayModal: React.FC<ConfigurePayModalProps> = ({
           className="fixed inset-0 dark:bg-black bg-white z-50 p-4 overflow-y-auto"
         >
           <div className="relative w-full min-h-full flex items-center justify-center py-6">
-            <CardSpotlight>
+            <div className="dark:bg-black/60 bg-white/90 border border-gray-200 dark:border-gray-800 rounded-xl backdrop-blur-sm shadow-2xl">
               <motion.div
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -647,7 +646,7 @@ const ConfigurePayModal: React.FC<ConfigurePayModalProps> = ({
                   </div>
                 </div>
               </motion.div>
-            </CardSpotlight>
+            </div>
           </div>
         </motion.div>
       </AnimatePresence>
