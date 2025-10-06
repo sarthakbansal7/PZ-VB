@@ -28,11 +28,18 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ isOpen, onClose }) => {
             path: "/pages/airdrop"
         },
         {
+            name: "Stream Payments",
+            description: "Continuous token streaming with real-time vesting schedules",
+            icon: Radio,
+            path: "/pages/streaming"
+        },
+        {
             name: "Dao Payroll",
             description: "Automated payroll management for decentralized organizations",
             icon: ShieldCheck,
             path: "/pages/dao"
         },
+
         {
             name: "Invoices",
             description: "Create and manage professional invoices with ease",

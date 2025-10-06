@@ -9,36 +9,36 @@ export function IntroCards() {
             <GridItem
                 area="md:[grid-area:1/1/2/7] xl:[grid-area:1/1/2/5]"
                 icon={<Box className="h-4 w-4 text-neutral-200" />}
-                title="Do payments the right way."
-                description="Bulk and P2P crypto payments. All in one place."
+                title="Automate payroll seamlessly."
+                description="Set schedules, manage crypto payments for employees."
             />
 
             <GridItem
                 area="md:[grid-area:1/7/2/13] xl:[grid-area:2/1/3/5]"
                 icon={<Settings className="h-4 w-4 text-neutral-200" />}
-                title="Multichain support."
-                description="Yes, it's true and soon more to come."
+                title="Stream payments instantly."
+                description="Real-time money flow by second, minute, or hour."
             />
 
             <GridItem
                 area="md:[grid-area:2/1/3/7] xl:[grid-area:1/5/3/8]"
                 icon={<Lock className="h-4 w-4 text-neutral-200 " />}
-                title="You don't need to build trust."
-                description="It's all secure encrypted and zero knowledge."
+                title="Make bulk payments seamlessly."
+                description="Send to hundreds of wallets in one transaction."
             />
 
             <GridItem
                 area="md:[grid-area:2/7/3/13] xl:[grid-area:1/8/2/13]"
                 icon={<Sparkles className="h-4 w-4 text-neutral-200" />}
-                title="All at once."
-                description="Buy, pay, convert, offramp, and more."
+                title="Do airdrops effortlessly."
+                description="Launch token distributions across multiple chains."
             />
 
             <GridItem
                 area="md:[grid-area:3/1/4/13] xl:[grid-area:2/8/3/13]"
                 icon={<Search className="h-4 w-4 text-neutral-200 " />}
-                title="Need Help?"
-                description="Trade, prices, orders, and more. Our Ai agents will suport you like never before."
+                title="Experience web3 payments."
+                description="Simple, secure, and powerful for everyone."
             />
         </ul>
     );
