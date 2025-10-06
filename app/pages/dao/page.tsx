@@ -13,12 +13,12 @@ import { generatePaymentCsv } from "@/lib/csv-utils";
 import { toast } from "react-hot-toast";
 import { parseUnits } from 'ethers';
 import { getPayrollAddress, NATIVE_TOKEN_ADDRESS } from '@/lib/contract-addresses';
-import { contractMainnetAddresses as transferContract } from '@/lib/evm-tokens-mainnet';
+
 import { allMainnetChains as chains, NATIVE_ADDRESS } from '@/lib/evm-chains-mainnet';
 import { tokensPerMainnetChain as tokens } from '@/lib/evm-tokens-mainnet';
 import payrollAbi from '@/lib/PayrollAbi.json';
 import { erc20Abi } from 'viem';
-import { useAccount, useWriteContract, useWaitForTransactionReceipt, useConfig } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useConfig, useChainId } from 'wagmi';
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { useReadContract } from "wagmi";
 import useFullPageLoader from "@/hooks/usePageLoader";
@@ -55,19 +55,28 @@ const PaymentsPage: React.FC = () => {
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined);
   const [showCsvDownloadModal, setShowCsvDownloadModal] = useState(false);
 
-  // Get transfer contract address for current chain
-  const getTransferContract = () => {
-    // First try to get from the new contract addresses configuration
-    const contractAddress = getPayrollAddress(selectedChain.id);
-    if (contractAddress) {
-      return contractAddress;
-    }
-    // Fallback to the old configuration
-    return transferContract[selectedChain.id];
-  };
   // Wallet and transaction hooks
   const { address, isConnected, chainId } = useAccount();
+  const currentChainId = useChainId();
   const config = useConfig();
+  
+  // Get payroll contract address for current network
+  const getTransferContract = () => {
+    return getPayrollAddress(currentChainId);
+  };
+  
+  // Debug network information
+  useEffect(() => {
+    console.log('=== PAYROLL NETWORK DEBUG ===');
+    console.log('Chain ID:', currentChainId);
+    console.log('Payroll Contract Address:', getTransferContract());
+    console.log('Is Mainnet (39):', currentChainId === 39);
+    console.log('Is Testnet (2484):', currentChainId === 2484);
+  }, [currentChainId]);
+  
+  // Check if contract is available on current network
+  const isContractAvailable = !!getTransferContract();
+  const networkName = currentChainId === 39 ? 'U2U Mainnet' : currentChainId === 2484 ? 'U2U Testnet' : 'Unknown Network';
   const { writeContractAsync, isPending: isWritePending, data: wagmiTxHash } = useWriteContract();
   const { isLoading: isTxLoading, isSuccess: isTxSuccess, isError: isTxError } =
     useWaitForTransactionReceipt({ hash: wagmiTxHash });
@@ -98,7 +107,7 @@ const PaymentsPage: React.FC = () => {
       address as `0x${string}`,
       getTransferContract() as `0x${string}`
     ],
-    chainId: selectedChain?.id,
+    chainId: currentChainId,
     query: {
       enabled: isConnected &&
         !!selectedToken &&
@@ -145,7 +154,7 @@ const PaymentsPage: React.FC = () => {
   // Handle token symbol changes
   useEffect(() => {
     if (selectedTokenSymbol && selectedChain) {
-      const chainTokens = tokens[selectedChain.id] || [];
+      const chainTokens = tokens[currentChainId] || [];
       const matchedToken = chainTokens.find(token => token.symbol === selectedTokenSymbol);
 
       if (matchedToken) {
@@ -190,7 +199,7 @@ const PaymentsPage: React.FC = () => {
     
     const totalTokenAmount = usdToToken(totalUsd.toString());
     // For U2U chain (id 39) and native token, ensure we use 18 decimals
-    const decimals = selectedChain.id === 39 && selectedToken.address === NATIVE_ADDRESS 
+    const decimals = currentChainId === 39 && selectedToken.address === NATIVE_ADDRESS 
       ? 18 
       : selectedToken.decimals;
     return parseUnits(totalTokenAmount, decimals);
@@ -205,7 +214,7 @@ const PaymentsPage: React.FC = () => {
       amounts: selectedEmployeeData.map(emp => {
         const tokenAmount = usdToToken(emp.salary);
         // For U2U chain (id 39) and native token, ensure we use 18 decimals
-        const decimals = selectedChain.id === 39 && selectedToken.address === NATIVE_ADDRESS 
+        const decimals = currentChainId === 39 && selectedToken.address === NATIVE_ADDRESS 
           ? 18 
           : selectedToken.decimals;
         return parseUnits(tokenAmount, decimals);
@@ -284,7 +293,7 @@ const PaymentsPage: React.FC = () => {
     if (isConnected && selectedToken && address && selectedToken?.address !== NATIVE_ADDRESS) {
       refetchAllowance();
     }
-  }, [selectedToken?.address, selectedChain?.id, refetchAllowance, isConnected, address, selectedToken]);
+  }, [selectedToken?.address, currentChainId, refetchAllowance, isConnected, address, selectedToken]);
 
   // Check if all employees are selected
   const allEmployeesSelected = selectedEmployees.length === employees.length;
@@ -322,7 +331,7 @@ const PaymentsPage: React.FC = () => {
         ],
         value: totalAmount,
         gas: BigInt(400000),
-        chainId: selectedChain.id
+        chainId: currentChainId
       });
 
       // Set the state and log immediately with the correct hash
@@ -468,6 +477,42 @@ const PaymentsPage: React.FC = () => {
           onConfigurePayments={() => setShowConfigurePayModal(true)}
           onAddEmployee={handleAddEmployeeClick}
           onBulkUpload={handleBulkUploadClick} />
+
+        {/* Network Status Indicator */}
+        <div className="w-full max-w-6xl mb-4">
+          <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+            isContractAvailable 
+              ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300' 
+              : 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300'
+          }`}>
+            <div className={`w-2 h-2 rounded-full mr-2 ${
+              isContractAvailable ? 'bg-green-500' : 'bg-red-500'
+            }`}></div>
+            {isContractAvailable 
+              ? `Connected to ${networkName}` 
+              : `Payroll not available on ${networkName}`
+            }
+          </div>
+        </div>
+
+        {/* Contract Availability Warning */}
+        {!isContractAvailable && (
+          <div className="w-full max-w-6xl mb-6">
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+              <div className="flex items-center">
+                <div className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-3">⚠️</div>
+                <div>
+                  <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
+                    Payroll Contract Not Available
+                  </h3>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
+                    The payroll contract is not deployed on {networkName}. Please switch to U2U Mainnet or U2U Testnet to use this feature.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <EmployeeTable2
           employees={employees}

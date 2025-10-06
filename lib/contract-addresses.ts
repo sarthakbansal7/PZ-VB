@@ -15,11 +15,22 @@ export interface NetworkContracts {
   [chainId: number]: ContractAddresses;
 }
 
+// U2U Mainnet Chain ID
+export const U2U_MAINNET_CHAIN_ID = 39;
 // U2U Testnet Chain ID
-export const U2U_TESTNET_CHAIN_ID = 2484; // Replace with actual U2U testnet chain ID
+export const U2U_TESTNET_CHAIN_ID = 2484;
 
 // Contract addresses for different networks
 export const CONTRACT_ADDRESSES: NetworkContracts = {
+  // U2U Mainnet
+  [U2U_MAINNET_CHAIN_ID]: {
+    bulkTransfer: "0xbb7E1b1Ef5c36fC4aE96879Ea3c4586B68569cAC",
+    airdrop: "0xDfcB96A9A5744CdfB173C36849Af5bD7343DAb7E",
+    payroll: "0x463c2b415329e199a936381b09b7499e7E68d7F9",
+    stream: "0x41353BAFF99bAB4AfE2bb6acF040C8C75B80137f",
+    invoices: "0x0A51554c3a743A62fcb6a633cf04CB2e0cd14169",
+  },
+  
   // U2U Testnet
   [U2U_TESTNET_CHAIN_ID]: {
     bulkTransfer: "0x071A4FCcEEe657c8d4729F664957e1777f6A719E",

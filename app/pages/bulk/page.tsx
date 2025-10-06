@@ -9,12 +9,13 @@ import BulkUploadModal from "@/components/payroll/BulkuploadModal";
 import { Employee as Recipient, BulkRecipient, PayrollData } from "@/lib/interfaces";
 import { toast } from "react-hot-toast";
 import { parseUnits } from 'ethers';
-import { contractMainnetAddresses as transferContract } from '@/lib/evm-tokens-mainnet';
+
 import { allMainnetChains as chains, NATIVE_ADDRESS } from '@/lib/evm-chains-mainnet';
 import { tokensPerMainnetChain as tokens } from '@/lib/evm-tokens-mainnet';
 import transferAbi from '@/lib/Transfer.json';
 import { erc20Abi } from 'viem';
-import { useAccount, useWriteContract, useWaitForTransactionReceipt, useConfig } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useConfig, useChainId } from 'wagmi';
+import { getBulkTransferAddress } from '@/lib/contract-addresses';
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { useReadContract } from "wagmi";
 import useFullPageLoader from "@/hooks/usePageLoader";
@@ -50,13 +51,28 @@ const BulkPayoutPage: React.FC = () => {
   const [selectedToken, setSelectedToken] = useState(tokens[chains[0].id][0]);
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined);
 
-  // Get transfer contract address for current chain
-  const getTransferContract = () => {
-    return transferContract[selectedChain.id];
-  };
   // Wallet and transaction hooks
   const { address, isConnected, chainId } = useAccount();
+  const currentChainId = useChainId();
   const config = useConfig();
+  
+  // Get transfer contract address for current network
+  const getTransferContract = () => {
+    return getBulkTransferAddress(currentChainId);
+  };
+  
+  // Debug network information
+  useEffect(() => {
+    console.log('=== BULK TRANSFER NETWORK DEBUG ===');
+    console.log('Chain ID:', currentChainId);
+    console.log('BulkTransfer Contract Address:', getTransferContract());
+    console.log('Is Mainnet (39):', currentChainId === 39);
+    console.log('Is Testnet (2484):', currentChainId === 2484);
+  }, [currentChainId]);
+  
+  // Check if contract is available on current network
+  const isContractAvailable = !!getTransferContract();
+  const networkName = currentChainId === 39 ? 'U2U Mainnet' : currentChainId === 2484 ? 'U2U Testnet' : 'Unknown Network';
   const { writeContractAsync, isPending: isWritePending, data: wagmiTxHash } = useWriteContract();
   const { isLoading: isTxLoading, isSuccess: isTxSuccess, isError: isTxError } =
     useWaitForTransactionReceipt({ hash: wagmiTxHash });
@@ -87,7 +103,7 @@ const BulkPayoutPage: React.FC = () => {
       address as `0x${string}`,
       getTransferContract() as `0x${string}`
     ],
-    chainId: selectedChain?.id,
+    chainId: currentChainId,
     query: {
       enabled: isConnected &&
         !!selectedToken &&
@@ -134,7 +150,7 @@ const BulkPayoutPage: React.FC = () => {
   // Handle token symbol changes
   useEffect(() => {
     if (selectedTokenSymbol && selectedChain) {
-      const chainTokens = tokens[selectedChain.id] || [];
+      const chainTokens = tokens[currentChainId] || [];
       const matchedToken = chainTokens.find(token => token.symbol === selectedTokenSymbol);
 
       if (matchedToken) {
@@ -271,7 +287,7 @@ const BulkPayoutPage: React.FC = () => {
           ],
           value: totalAmount,
           gas: BigInt(400000),
-          chainId: selectedChain.id
+          chainId: currentChainId
         });
 
         // Set the state and log immediately with the correct hash
@@ -290,7 +306,7 @@ const BulkPayoutPage: React.FC = () => {
             amounts
           ],
           gas: BigInt(400000),
-          chainId: selectedChain.id
+          chainId: currentChainId
         });
 
         // Set the state and log immediately with the correct hash
@@ -353,14 +369,14 @@ const BulkPayoutPage: React.FC = () => {
             abi: erc20Abi,
             functionName: 'approve',
             args: [transferContractAddress as `0x${string}`, totalAmount],
-            chainId: selectedChain.id,
+            chainId: currentChainId,
             gas: BigInt(400000)
           });
 
           setApprovalTxHash(approvalHash);
 
           const approvalReceipt = await waitForTransactionReceipt(config, {
-            chainId: selectedChain.id,
+            chainId: currentChainId,
             hash: approvalHash
           });
 
@@ -495,6 +511,27 @@ const BulkPayoutPage: React.FC = () => {
           onConfigurePayments={() => setShowConfigurePayModal(true)}
           onAddEmployee={handleAddRecipientClick}
           onBulkUpload={handleBulkUploadClick} />
+
+        
+
+        {/* Contract Availability Warning */}
+        {!isContractAvailable && (
+          <div className="w-full max-w-6xl mb-6">
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+              <div className="flex items-center">
+                <div className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-3">⚠️</div>
+                <div>
+                  <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
+                    Bulk Transfer Contract Not Available
+                  </h3>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
+                    The bulk transfer contract is not deployed on {networkName}. Please switch to U2U Mainnet or U2U Testnet to use this feature.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <PaymentDashboard
           exchangeRate={exchangeRate}

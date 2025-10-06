@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect } from 'react'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useChainId } from 'wagmi'
 import { parseUnits, formatUnits, parseEther } from 'viem'
 import { Wallet, Play, Pause, Clock, Plus, RefreshCw, Home, Upload, Download, Edit, Trash2, Calendar, Timer, DollarSign, Activity, Target, ArrowRight, Eye, Settings, Zap } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { toast } from "react-hot-toast"
 import Link from 'next/link'
-import { getStreamAddress, U2U_TESTNET_CHAIN_ID, NATIVE_TOKEN_ADDRESS } from '@/lib/contract-addresses'
+import { getStreamAddress, NATIVE_TOKEN_ADDRESS } from '@/lib/contract-addresses'
 
 // Stream Contract ABI (essential functions only)
 const STREAM_CONTRACT_ABI = [
@@ -177,9 +177,23 @@ export default function Page() {
   
   // Wallet connection
   const { address, isConnected, chain } = useAccount()
+  const chainId = useChainId()
   
-  // Contract address and hooks
-  const streamContractAddress = getStreamAddress(U2U_TESTNET_CHAIN_ID)
+  // Contract address for current network
+  const streamContractAddress = getStreamAddress(chainId)
+  
+  // Debug network information
+  useEffect(() => {
+    console.log('=== STREAMING NETWORK DEBUG ===')
+    console.log('Chain ID:', chainId)
+    console.log('Stream Contract Address:', streamContractAddress)
+    console.log('Is Mainnet (39):', chainId === 39)
+    console.log('Is Testnet (2484):', chainId === 2484)
+  }, [chainId, streamContractAddress])
+  
+  // Check if contract is available on current network
+  const isContractAvailable = !!streamContractAddress
+  const networkName = chainId === 39 ? 'U2U Mainnet' : chainId === 2484 ? 'U2U Testnet' : 'Unknown Network'
   const { writeContract, data: hash, error, isPending } = useWriteContract()
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash })
 
@@ -652,7 +666,8 @@ export default function Page() {
         address: streamContractAddress as `0x${string}`,
         abi: STREAM_CONTRACT_ABI,
         functionName: 'claimStream',
-        args: [stream.streamId]
+        args: [stream.streamId],
+        chainId: chainId
       })
       
       toast.success(`Claiming ${formatUnits(stream.claimableAmount, 18)} ${stream.tokenSymbol}...`)
@@ -691,7 +706,8 @@ export default function Page() {
         address: streamContractAddress as `0x${string}`,
         abi: STREAM_CONTRACT_ABI,
         functionName: 'claimMultipleStreams',
-        args: [streamIds]
+        args: [streamIds],
+        chainId: chainId
       })
       
       toast.success(`Claiming total of ${formatUnits(totalClaimable, 18)} tokens from ${selectedStreams.length} streams...`)
@@ -891,7 +907,8 @@ export default function Page() {
           amounts, 
           durations
         ],
-        value: tokenAddress === NATIVE_TOKEN_ADDRESS ? totalAmount : BigInt(0)
+        value: tokenAddress === NATIVE_TOKEN_ADDRESS ? totalAmount : BigInt(0),
+        chainId: chainId
       })
       
       toast.success('Transaction submitted! Waiting for confirmation...')
@@ -1497,6 +1514,8 @@ export default function Page() {
         <div className="flex flex-col items-center px-4 py-8 min-h-screen">
           {/* Header Section */}
           <div className="w-full max-w-6xl mb-6">
+            
+
             {/* Header with Title and Token Selector */}
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-bold text-black dark:text-white flex items-center">
@@ -1558,11 +1577,46 @@ export default function Page() {
             </div>
           </div>
 
+          {/* Contract Availability Warning */}
+          {!isContractAvailable && (
+            <div className="w-full max-w-6xl mb-6">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                <div className="flex items-center">
+                  <div className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-3">⚠️</div>
+                  <div>
+                    <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
+                      Streaming Contract Not Available
+                    </h3>
+                    <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
+                      The streaming contract is not deployed on {networkName}. Please switch to U2U Mainnet or U2U Testnet to use this feature.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Main Content Area */}
           <div className="w-full max-w-6xl">
             <div className="bg-transparent rounded-xl">
-              {activeTab === 'create' && <CreateStreamContent />}
-              {activeTab === 'claim' && <ClaimStreamContent />}
+              {isContractAvailable ? (
+                <>
+                  {activeTab === 'create' && <CreateStreamContent />}
+                  {activeTab === 'claim' && <ClaimStreamContent />}
+                </>
+              ) : (
+                <div className="text-center py-20">
+                  <div className="p-3 rounded-full bg-gray-100 dark:bg-gray-800 w-fit mx-auto mb-4">
+                    <Zap className="w-8 h-8 text-gray-600 dark:text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                    Streaming Feature Unavailable
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Please switch to U2U Mainnet or U2U Testnet to use the streaming feature.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

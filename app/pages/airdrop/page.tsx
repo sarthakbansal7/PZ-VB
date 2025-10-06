@@ -2,14 +2,13 @@
 
 import React, { useState, useEffect } from 'react'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
-import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi'
+import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt, useChainId } from 'wagmi'
 import { parseUnits, formatUnits } from 'viem'
 import { Wallet, Gift, Coins, Plus, Minus, RefreshCw, Home, ExternalLink, Upload, Download, Edit, Trash2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { toast } from "react-hot-toast"
 import Link from 'next/link'
 import { getAirdropAddress, NATIVE_TOKEN_ADDRESS } from '@/lib/contract-addresses'
-import { U2U_TESTNET_CONFIG } from '@/api/u2uApi'
 import airdropAbi from '@/lib/AirdropAbi.json'
 
 // Types for airdrop data
@@ -68,13 +67,27 @@ export default function Page() {
   
   // Wallet connection
   const { address, isConnected } = useAccount()
+  const chainId = useChainId()
 
   // Contract hooks
   const { writeContractAsync } = useWriteContract()
   const [pendingTxHash, setPendingTxHash] = useState<`0x${string}` | undefined>()
   
-  // Get airdrop contract address
-  const airdropContractAddress = getAirdropAddress(U2U_TESTNET_CONFIG.chainId)
+  // Get airdrop contract address for current network
+  const airdropContractAddress = getAirdropAddress(chainId)
+  
+  // Debug network information
+  useEffect(() => {
+    console.log('=== AIRDROP NETWORK DEBUG ===')
+    console.log('Chain ID:', chainId)
+    console.log('Airdrop Contract Address:', airdropContractAddress)
+    console.log('Is Mainnet (39):', chainId === 39)
+    console.log('Is Testnet (2484):', chainId === 2484)
+  }, [chainId, airdropContractAddress])
+
+  // Check if contract is available on current network
+  const isContractAvailable = !!airdropContractAddress
+  const networkName = chainId === 39 ? 'U2U Mainnet' : chainId === 2484 ? 'U2U Testnet' : 'Unknown Network'
 
   // Read native token claimable amount
   const { data: nativeClaimableAmount, refetch: refetchNative } = useReadContract({
@@ -82,7 +95,7 @@ export default function Page() {
     abi: airdropAbi.abi,
     functionName: 'getClaimableETH',
     args: address ? [address] : undefined,
-    chainId: U2U_TESTNET_CONFIG.chainId,
+    chainId: chainId,
     query: {
       enabled: !!address && !!airdropContractAddress,
     }
@@ -283,7 +296,7 @@ export default function Page() {
         functionName: 'sendAirdrop',
         args: [tokenAddress, recipientAddresses, amounts],
         value: totalNativeAmount,
-        chainId: U2U_TESTNET_CONFIG.chainId,
+        chainId: chainId,
       })
 
       setPendingTxHash(txHash)
@@ -326,7 +339,7 @@ export default function Page() {
         abi: airdropAbi.abi,
         functionName: 'claimAirdrop',
         args: [airdrop.token],
-        chainId: U2U_TESTNET_CONFIG.chainId,
+        chainId: chainId,
       })
 
       toast.success(`Claim transaction sent! Hash: ${txHash}`)
@@ -621,6 +634,8 @@ export default function Page() {
         <div className="flex flex-col max-w-screen max-h-screen items-center m-10">
           {/* Header Section */}
           <div className="w-full max-w-6xl mb-6">
+            
+            
             {/* Header with Title and Token Selector */}
             <div className="flex justify-between items-center mb-4">
               <h1 className="text-2xl font-bold text-black dark:text-white">Token Airdrops</h1>
@@ -677,11 +692,46 @@ export default function Page() {
             </div>
           </div>
 
+          {/* Contract Availability Warning */}
+          {!isContractAvailable && (
+            <div className="w-full max-w-6xl mb-6">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                <div className="flex items-center">
+                  <div className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-3">⚠️</div>
+                  <div>
+                    <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
+                      Airdrop Contract Not Available
+                    </h3>
+                    <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
+                      The airdrop contract is not deployed on {networkName}. Please switch to U2U Mainnet or U2U Testnet to use this feature.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Main Content Area */}
           <div className="w-full max-w-6xl flex-1 overflow-hidden">
             <div className="bg-transparent rounded-xl overflow-hidden">
-              {activeTab === 'create' && <CreateAirdropContent />}
-              {activeTab === 'claim' && <ClaimAirdropContent />}
+              {isContractAvailable ? (
+                <>
+                  {activeTab === 'create' && <CreateAirdropContent />}
+                  {activeTab === 'claim' && <ClaimAirdropContent />}
+                </>
+              ) : (
+                <div className="text-center py-20">
+                  <div className="p-3 rounded-full bg-gray-100 dark:bg-gray-800 w-fit mx-auto mb-4">
+                    <Gift className="w-8 h-8 text-gray-600 dark:text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                    Airdrop Feature Unavailable
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Please switch to U2U Mainnet or U2U Testnet to use the airdrop feature.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

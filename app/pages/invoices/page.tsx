@@ -62,6 +62,19 @@ export default function InvoicesPage() {
   // Get contract address
   const contractAddress = getInvoicesAddress(chainId)
   
+  // Debug network information
+  useEffect(() => {
+    console.log('=== INVOICES NETWORK DEBUG ===')
+    console.log('Chain ID:', chainId)
+    console.log('Invoices Contract Address:', contractAddress)
+    console.log('Is Mainnet (39):', chainId === 39)
+    console.log('Is Testnet (2484):', chainId === 2484)
+  }, [chainId, contractAddress])
+  
+  // Check if contract is available on current network
+  const isContractAvailable = !!contractAddress
+  const networkName = chainId === 39 ? 'U2U Mainnet' : chainId === 2484 ? 'U2U Testnet' : 'Unknown Network'
+  
   // Read contract to get invoices by creator
   const { data: invoiceIds, refetch: refetchInvoiceIds } = useReadContract({
     address: contractAddress as `0x${string}`,
@@ -216,6 +229,7 @@ export default function InvoicesPage() {
         abi: InvoicesAbi.abi,
         functionName: 'createInvoice',
         args: [createForm.name, createForm.details, amountInWei],
+        chainId: chainId,
       })
       
       toast.loading('Creating invoice... Please confirm the transaction')
@@ -478,6 +492,8 @@ export default function InvoicesPage() {
         <div className="flex flex-col max-w-screen max-h-screen items-center m-10">
           {/* Header Section */}
           <div className="w-full max-w-6xl mb-6">
+            
+            
             {/* Header with Title and Create Button */}
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-bold text-black dark:text-white">My Invoices</h1>
@@ -485,7 +501,12 @@ export default function InvoicesPage() {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="flex items-center px-4 py-2 bg-transparent border border-blue-600 hover:bg-blue-600 hover:text-white text-blue-600 dark:text-blue-400 dark:border-blue-400 dark:hover:bg-blue-400 dark:hover:text-black rounded-lg transition-colors duration-200"
+                  disabled={!isContractAvailable}
+                  className={`flex items-center px-4 py-2 border rounded-lg transition-colors duration-200 ${
+                    isContractAvailable
+                      ? 'bg-transparent border-blue-600 hover:bg-blue-600 hover:text-white text-blue-600 dark:text-blue-400 dark:border-blue-400 dark:hover:bg-blue-400 dark:hover:text-black'
+                      : 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:border-gray-600 dark:text-gray-500'
+                  }`}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Create Invoice
@@ -495,10 +516,43 @@ export default function InvoicesPage() {
             </div>
           </div>
 
+          {/* Contract Availability Warning */}
+          {!isContractAvailable && (
+            <div className="w-full max-w-6xl mb-6">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                <div className="flex items-center">
+                  <div className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-3">⚠️</div>
+                  <div>
+                    <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
+                      Invoices Contract Not Available
+                    </h3>
+                    <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
+                      The invoices contract is not deployed on {networkName}. Please switch to U2U Mainnet or U2U Testnet to use this feature.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Main Content Area - Invoice List */}
           <div className="w-full max-w-6xl flex-1 overflow-hidden">
             <div className="bg-transparent rounded-xl overflow-hidden">
-              <InvoiceListContent />
+              {isContractAvailable ? (
+                <InvoiceListContent />
+              ) : (
+                <div className="text-center py-20">
+                  <div className="p-3 rounded-full bg-gray-100 dark:bg-gray-800 w-fit mx-auto mb-4">
+                    <FileText className="w-8 h-8 text-gray-600 dark:text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                    Invoices Feature Unavailable
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Please switch to U2U Mainnet or U2U Testnet to use the invoices feature.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
