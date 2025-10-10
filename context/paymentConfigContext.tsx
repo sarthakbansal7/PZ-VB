@@ -63,7 +63,15 @@ export const PaymentConfigProvider: React.FC<{ children: ReactNode }> = ({ child
 export const usePaymentConfig = () => {
   const context = useContext(PaymentConfigContext);
   if (context === undefined) {
-    throw new Error('usePaymentConfig must be used within a PaymentConfigProvider');
+    // Return default values during SSR or when provider is not available
+    // This prevents build errors during static generation
+    return {
+      config: defaultConfig,
+      updateConfig: () => {}, // No-op function
+      showConfigModal: false, // Don't show modal during SSR
+      setShowConfigModal: () => {}, // No-op function
+      resetConfig: () => {}, // No-op function
+    };
   }
   return context;
 };
