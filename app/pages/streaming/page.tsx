@@ -975,12 +975,11 @@ export default function Page() {
               Stream Name *
             </label>
             <input
-              type="text"
-              value={streamName}
-              onChange={(e) => setStreamName(e.target.value)}
-              placeholder="Enter stream name"
-              className="w-full px-3 py-2 border border-gray-400/60 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white caret-black dark:caret-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
-            />
+                  type="text"
+                  placeholder="Enter stream name"
+                  className="w-full px-3 py-2 border border-white/20 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  id="tokenSymbol"
+                />
           </div>
 
           {/* Stream Duration */}
@@ -1189,13 +1188,12 @@ export default function Page() {
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Description (Optional)
           </label>
-          <textarea
-            value={streamDescription}
-            onChange={(e) => setStreamDescription(e.target.value)}
-            placeholder="Describe the purpose of this stream..."
-            rows={3}
-            className="w-full px-3 py-2 border border-gray-400/60 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white caret-black dark:caret-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 dark:placeholder:text-gray-400 resize-none"
-          />
+          <input
+                  type="text"
+                  placeholder="Enter description (if any)"
+                  className="w-full px-3 py-2 border border-white/20 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  id="tokenSymbol"
+                />
         </div>
 
         {/* Start Options */}
