@@ -45,11 +45,11 @@ const TransactionSuccessModal: React.FC<TransactionSuccessModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-md" onClick={onClose} />
       
       {/* Modal */}
       <div className="flex items-center justify-center min-h-screen px-4 py-6">
-        <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-lg w-full mx-auto border border-gray-200 dark:border-gray-700 animate-fade-in">
+        <div className="relative bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl max-w-lg w-full mx-auto border border-gray-200/50 dark:border-gray-700/50 animate-fade-in">
           {/* Close button */}
           <button
             onClick={onClose}
