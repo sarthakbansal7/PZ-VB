@@ -278,7 +278,7 @@ const EmployeeTable2: React.FC<EmployeeTable2Props> = ({
     }
 
     return (
-        <div className={`w-[95vw] xl:w-[85vw] h-full bg-transparent dark:text-white text-black shadow-sm rounded-lg overflow-hidden `}>
+        <div className={`w-full h-full bg-transparent dark:text-white text-black shadow-sm rounded-lg overflow-hidden `}>
             <div className="p-4 border-b border-gray-300 dark:border-gray-700 bg-transparent">
                 <div className="flex flex-col lg:flex-row gap-4 justify-between items-center">
                     <div className="relative w-full lg:w-auto lg:flex-grow max-w-md">

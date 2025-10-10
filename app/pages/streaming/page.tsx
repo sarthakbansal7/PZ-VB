@@ -1500,16 +1500,9 @@ export default function Page() {
   )
 
   return (
-    <div className="relative h-screen w-screen dark:text-white text-black p-6 z-10">
-      {/* Home button */}
-      <div className="absolute top-4 left-4">
-        <Link href="/">
-          <Home className="text-black dark:hover:text-gray-200 hover:text-gray-800 dark:text-white" size={30} />
-        </Link>
-      </div>
-
+    <div className="w-full dark:text-white text-black">
       {isConnected ? (
-        <div className="flex flex-col items-center px-4 py-8 min-h-screen">
+        <div className="flex flex-col items-center px-2 sm:px-4 py-4 min-h-full">
           {/* Header Section */}
           <div className="w-full max-w-6xl mb-6">
             
@@ -1544,7 +1537,63 @@ export default function Page() {
                     </svg>
                   </div>
                 </div>
-                <ConnectButton />
+                <div className="connect-button-light">
+                  <ConnectButton />
+                </div>
+                <style jsx>{`
+                  .connect-button-light :global([data-rk]) {
+                    background-color: white !important;
+                    border-color: #e5e7eb !important;
+                    color: black !important;
+                  }
+                  .connect-button-light :global([data-rk] *) {
+                    background-color: white !important;
+                    border-color: #e5e7eb !important;
+                    color: black !important;
+                  }
+                  .connect-button-light :global([data-rk] > div) {
+                    background-color: white !important;
+                    border-color: #e5e7eb !important;
+                    color: black !important;
+                  }
+                  .connect-button-light :global([data-rk] button) {
+                    background-color: white !important;
+                    border-color: #e5e7eb !important;
+                    color: black !important;
+                  }
+                  .connect-button-light :global([data-rk] div) {
+                    background-color: white !important;
+                    border-color: #e5e7eb !important;
+                    color: black !important;
+                  }
+                  @media (prefers-color-scheme: dark) {
+                    .connect-button-light :global([data-rk]) {
+                      background-color: #1f2937 !important;
+                      border-color: #374151 !important;
+                      color: white !important;
+                    }
+                    .connect-button-light :global([data-rk] *) {
+                      background-color: #1f2937 !important;
+                      border-color: #374151 !important;
+                      color: white !important;
+                    }
+                    .connect-button-light :global([data-rk] > div) {
+                      background-color: #1f2937 !important;
+                      border-color: #374151 !important;
+                      color: white !important;
+                    }
+                    .connect-button-light :global([data-rk] button) {
+                      background-color: #1f2937 !important;
+                      border-color: #374151 !important;
+                      color: white !important;
+                    }
+                    .connect-button-light :global([data-rk] div) {
+                      background-color: #1f2937 !important;
+                      border-color: #374151 !important;
+                      color: white !important;
+                    }
+                  }
+                `}</style>
               </div>
             </div>
             
@@ -1641,7 +1690,9 @@ export default function Page() {
             </div>
 
             <div className="w-full mx-auto pt-2 items-center flex justify-center">
-              <ConnectButton />
+              <div className="connect-button-light">
+                <ConnectButton />
+              </div>
             </div>
           </motion.div>
         </div>

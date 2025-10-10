@@ -9,12 +9,16 @@ interface PaymentsHeaderProps {
   onConfigurePayments: () => void;
   onAddEmployee: () => void;
   onBulkUpload: () => void;
+  title?: string;
+  description?: string;
 }
 
 const PaymentsHeader: React.FC<PaymentsHeaderProps> = ({
   onConfigurePayments,
   onAddEmployee,
   onBulkUpload,
+  title = "PayZoll Bulk Payments",
+  description = "Manage, Distribute and Process Bulk Payments",
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -52,10 +56,10 @@ const PaymentsHeader: React.FC<PaymentsHeaderProps> = ({
         {/* Left Side: Title and Description */}
         <div className="w-full md:w-auto">
           <h1 className="text-lg sm:text-2xl md:text-3xl lg:text font-bold text-black dark:text-white">
-            PayZoll Bulk Payments
+            {title}
           </h1>
           <p className="text-sm hidden sm:block sm:text-base md:text-lg text-gray-600 dark:text-gray-300 mt-1">
-            Manage, Distribute and Process Bulk Payments
+            {description}
           </p>
         </div>
 

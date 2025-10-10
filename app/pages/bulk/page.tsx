@@ -500,13 +500,8 @@ const BulkPayoutPage: React.FC = () => {
   const hasTransactionActivity = isLoadingDerived || isTxSuccess || isTxError || !!txError || !!approvalTxHash || !!txHash;
 
   return (
-    <div className="relative h-screen w-screen dark:text-white text-black p-6 z-10">
-      <div className="absolute top-4 left-4">
-        <Link href="/">
-          <Home className="text-black dark:hover:text-gray-200 hover:text-gray-800 dark:text-white" size={30} />
-        </Link>
-      </div>
-      <div className="flex flex-col max-w-screen max-h-screen items-center m-10">
+    <div className="w-full dark:text-white text-black">
+      <div className="flex flex-col items-center px-2 sm:px-4 py-4 min-h-full">
         <PaymentsHeader
           onConfigurePayments={() => setShowConfigurePayModal(true)}
           onAddEmployee={handleAddRecipientClick}
