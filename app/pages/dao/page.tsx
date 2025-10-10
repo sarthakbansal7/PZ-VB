@@ -478,22 +478,7 @@ const PaymentsPage: React.FC = () => {
           onAddEmployee={handleAddEmployeeClick}
           onBulkUpload={handleBulkUploadClick} />
 
-        {/* Network Status Indicator */}
-        <div className="w-full max-w-6xl mb-4">
-          <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-            isContractAvailable 
-              ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300' 
-              : 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300'
-          }`}>
-            <div className={`w-2 h-2 rounded-full mr-2 ${
-              isContractAvailable ? 'bg-green-500' : 'bg-red-500'
-            }`}></div>
-            {isContractAvailable 
-              ? `Connected to ${networkName}` 
-              : `Payroll not available on ${networkName}`
-            }
-          </div>
-        </div>
+        
 
         {/* Contract Availability Warning */}
         {!isContractAvailable && (

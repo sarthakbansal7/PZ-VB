@@ -4,7 +4,6 @@ import React, { useState, DragEvent, ChangeEvent, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Upload, FileSpreadsheet, AlertCircle, Check, XCircle, Loader, Download } from "lucide-react";
 import { employerApi } from "@/api/employerApi";
-import { CardSpotlight } from "@/components/ui/cardSpotlight";
 
 interface BulkUploadModalProps {
   isOpen: boolean;
@@ -235,15 +234,14 @@ const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ isOpen, onClose, onUp
         onClick={onClose}
       >
         <div className="relative w-full min-h-full flex items-center justify-center py-6">
-          <CardSpotlight>
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ type: "spring", damping: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-transparent relative w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-4xl xl:max-w-5xl"
-            >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ type: "spring", damping: 20 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-black/90 backdrop-blur-md rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 relative w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-4xl xl:max-w-5xl"
+          >
               {/* Header */}
               <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-800/10">
                 <div className="flex items-center justify-between">
@@ -446,8 +444,7 @@ const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ isOpen, onClose, onUp
                   </motion.button>
                 </div>
               </div>
-            </motion.div>
-          </CardSpotlight>
+          </motion.div>
         </div>
       </motion.div>
     </AnimatePresence>
