@@ -6,6 +6,7 @@ import ConfigurePayModal from "@/components/payroll/ConfigurePayModal";
 import PaymentDashboard from "@/components/payroll/PaymentDashboard";
 import AddRecipientModal from "@/components/payroll/AddEmployeeModal";
 import BulkUploadModal from "@/components/payroll/BulkuploadModal";
+import TransactionSuccessModal from "@/components/ui/TransactionSuccessModal";
 import { Employee as Recipient, BulkRecipient, PayrollData } from "@/lib/interfaces";
 import { toast } from "react-hot-toast";
 import { parseUnits } from 'ethers';
@@ -27,7 +28,7 @@ import { set } from "react-hook-form";
 
 const BulkPayoutPage: React.FC = () => {
   // Original state
-  const [showConfigurePayModal, setShowConfigurePayModal] = useState(true);
+  const [showConfigurePayModal, setShowConfigurePayModal] = useState(false); // Changed to false
   const [exchangeRate, setExchangeRate] = useState(1);
   const [selectedTokenSymbol, setSelectedTokenSymbol] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
@@ -50,6 +51,15 @@ const BulkPayoutPage: React.FC = () => {
   const [selectedChain, setSelectedChain] = useState(chains[0]);
   const [selectedToken, setSelectedToken] = useState(tokens[chains[0].id][0]);
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined);
+  
+  // Success modal state
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successModalData, setSuccessModalData] = useState({
+    transactionHash: '',
+    totalAmount: '',
+    recipientCount: 0,
+    selectedRecipients: [] as Array<{ name: string; amount: string }>
+  });
 
   // Wallet and transaction hooks
   const { address, isConnected, chainId } = useAccount();
@@ -179,8 +189,39 @@ const BulkPayoutPage: React.FC = () => {
     };
   }, [txError]); // Re-run this effect whenever txError changes
 
+  // Effect to detect successful transactions and show success modal
+  useEffect(() => {
+    if (isTxSuccess && txHash && selectedRecipients.length > 0) {
+      console.log('Bulk transaction successful, showing success modal');
+      
+      // Calculate transaction details
+      const totalAmount = calculateTotalAmount();
+      const selectedRecipientData = recipients
+        .filter(recipient => selectedRecipients.includes(recipient.wallet))
+        .map(recipient => ({
+          name: recipient.name,
+          amount: usdToToken(recipient.amount)
+        }));
 
-
+      // Set success modal data
+      setSuccessModalData({
+        transactionHash: txHash,
+        totalAmount: usdToToken(totalAmount.toString()),
+        recipientCount: selectedRecipients.length,
+        selectedRecipients: selectedRecipientData
+      });
+      
+      // Show success modal
+      setShowSuccessModal(true);
+      
+      // Clear transaction states
+      setTxHash(undefined);
+      setCustomTxHash(undefined);
+      setApprovalTxHash(undefined);
+      setShowPaymentStatus(false);
+      setSelectedRecipients([]);
+    }
+  }, [isTxSuccess, txHash, selectedRecipients.length]);
 
   // Convert USD salary to token amount
   const usdToToken = (usdAmount: string) => {
@@ -331,11 +372,8 @@ const BulkPayoutPage: React.FC = () => {
       return;
     }
 
-    // Show success toast instead of backend logging
-    toast.success("Payment transaction completed successfully");
-    setTxHash(undefined);
-    setCustomTxHash(undefined);
-    setApprovalTxHash(undefined);
+    // Transaction hash will be handled by success modal useEffect
+    console.log('Bulk transaction logged successfully');
   };
 
   // Main transaction handling function
@@ -628,6 +666,19 @@ const BulkPayoutPage: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Transaction Success Modal */}
+        <TransactionSuccessModal
+          isOpen={showSuccessModal}
+          onClose={() => setShowSuccessModal(false)}
+          transactionHash={successModalData.transactionHash}
+          transactionType="bulk"
+          totalAmount={successModalData.totalAmount}
+          recipientCount={successModalData.recipientCount}
+          tokenSymbol={selectedToken.symbol}
+          explorerUrl={getExplorerUrl(successModalData.transactionHash as `0x${string}`)}
+          selectedRecipients={successModalData.selectedRecipients}
+        />
       </div>
     </div>
   );
