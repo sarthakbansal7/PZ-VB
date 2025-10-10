@@ -9,7 +9,7 @@ import { motion } from 'framer-motion'
 import { toast } from "react-hot-toast"
 import Link from 'next/link'
 import { getStreamAddress, NATIVE_TOKEN_ADDRESS } from '@/lib/contract-addresses'
-import { usePaymentConfig } from '@/context/paymentConfigContext'
+import { PaymentConfigProvider, usePaymentConfig } from '@/context/paymentConfigContext'
 import ConfigurePayModal from '@/components/payroll/ConfigurePayModal'
 
 // Stream Contract ABI (essential functions only)
@@ -131,7 +131,7 @@ interface CreatedStream {
   transactionHash?: string;
 }
 
-export default function Page() {
+function StreamingPage() {
   // State for tab management
   const [activeTab, setActiveTab] = useState('create')
   const [isMounted, setIsMounted] = useState(false)
@@ -1913,5 +1913,13 @@ export default function Page() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function Page() {
+  return (
+    <PaymentConfigProvider>
+      <StreamingPage />
+    </PaymentConfigProvider>
   )
 }

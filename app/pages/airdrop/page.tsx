@@ -8,7 +8,7 @@ import { Wallet, Gift, Coins, Plus, Minus, RefreshCw, Home, ExternalLink, Upload
 import { motion } from 'framer-motion'
 import { toast } from "react-hot-toast"
 import Link from 'next/link'
-import { usePaymentConfig } from '@/context/paymentConfigContext'
+import { PaymentConfigProvider, usePaymentConfig } from '@/context/paymentConfigContext'
 import ConfigurePayModal from '@/components/payroll/ConfigurePayModal'
 import { getAirdropAddress, NATIVE_TOKEN_ADDRESS } from '@/lib/contract-addresses'
 import airdropAbi from '@/lib/AirdropAbi.json'
@@ -42,7 +42,7 @@ interface CreatedAirdrop {
   transactionHash?: string;
 }
 
-export default function Page() {
+function AirdropPage() {
   // State for tab management
   const [activeTab, setActiveTab] = useState('create')
   const [isMounted, setIsMounted] = useState(false)
@@ -1380,5 +1380,13 @@ const CustomTokenModal: React.FC<CustomTokenModalProps> = ({ isOpen, onClose, on
         </div>
       </div>
     </div>
+  )
+}
+
+export default function AirdropPageWithProvider() {
+  return (
+    <PaymentConfigProvider>
+      <AirdropPage />
+    </PaymentConfigProvider>
   )
 }

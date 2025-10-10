@@ -8,7 +8,7 @@ import { FileText, Wallet, Plus, Eye, Copy, CheckCircle, Clock, Home, ExternalLi
 import { motion } from 'framer-motion'
 import { toast } from "react-hot-toast"
 import Link from 'next/link'
-import { usePaymentConfig } from '@/context/paymentConfigContext'
+import { PaymentConfigProvider, usePaymentConfig } from '@/context/paymentConfigContext'
 import ConfigurePayModal from '@/components/payroll/ConfigurePayModal'
 import InvoicesAbi from '../../../lib/InvoicesAbi.json'
 import { getInvoicesAddress } from '../../../lib/contract-addresses'
@@ -31,7 +31,7 @@ interface CreateInvoiceForm {
   amount: string;
 }
 
-export default function InvoicesPage() {
+function InvoicesPageContent() {
   // State for UI management
   const [isMounted, setIsMounted] = useState(false)
   
@@ -778,5 +778,13 @@ export default function InvoicesPage() {
       {/* Create Invoice Modal */}
       {showCreateModal && <CreateInvoiceModal />}
     </div>
+  )
+}
+
+export default function InvoicesPage() {
+  return (
+    <PaymentConfigProvider>
+      <InvoicesPageContent />
+    </PaymentConfigProvider>
   )
 }
