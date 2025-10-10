@@ -1,20 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useRouter } from 'next/navigation';
 import useFullPageLoader from '@/hooks/usePageLoader'
 import Loader from '@/components/ui/loader'
 import { AuroraBackground } from '@/components/ui/aurora';
 import { MONTSERRAT } from '@/lib/fonts';
 import { IntroCards } from '../intro/IntroCards';
-import ServiceModal from '@/components/intro/ServiceModal';
 
 function IntroPage() {
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const router = useRouter();
 
-    const openModal = () => {
-        setIsModalOpen(true);
-    };
-
-    const closeModal = () => {
-        setIsModalOpen(false);
+    const goToDashboard = () => {
+        router.push('/pages/dashboard');
     };
 
     return (
@@ -31,17 +27,15 @@ function IntroPage() {
                         <div className="mt-4 lg:mt-6 2xl:mt-4 flex justify-center">
                             <button
                                 className={`${MONTSERRAT.className} relative lg:text-xl text-lg bg-gradient-to-r from-indigo-600 via-blue-600-400 to-blue-700 text-white py-2 px-8 rounded-full hover:shadow-[0_0_25px_rgba(168,85,247,0.5)] transition-all duration-300 transform hover:scale-105`}
-                                onClick={openModal}
+                                onClick={goToDashboard}
                             >
-                                <span>Explore Our Services</span>
+                                <span>Go to Dashboard</span>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                {/* Services Modal */}
             </div>
-            <ServiceModal isOpen={isModalOpen} onClose={closeModal} />
         </AuroraBackground>
     );
 }
