@@ -40,6 +40,10 @@ export default function InvoicesPage() {
     details: '',
     amount: ''
   })
+  // Individual state variables for form fields (like streaming page)
+  const [invoiceName, setInvoiceName] = useState<string>('')
+  const [invoiceDetails, setInvoiceDetails] = useState<string>('')
+  const [invoiceAmount, setInvoiceAmount] = useState<string>('')
   const [isCreating, setIsCreating] = useState(false)
   
   // State for Invoice History
@@ -52,10 +56,10 @@ export default function InvoicesPage() {
   const chainId = useChainId()
   
   // Contract hooks
-  const { data: hash, isPending, writeContract } = useWriteContract()
+  const { data: hash, isPending, writeContract, error: writeError } = useWriteContract()
   
   // Wait for transaction confirmation
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+  const { isLoading: isConfirming, isSuccess: isConfirmed, error: receiptError } = useWaitForTransactionReceipt({
     hash,
   })
   
@@ -104,6 +108,10 @@ export default function InvoicesPage() {
     if (isConfirmed) {
       toast.success('Invoice created successfully!')
       setCreateForm({ name: '', details: '', amount: '' })
+      // Reset individual form fields
+      setInvoiceName('')
+      setInvoiceDetails('')
+      setInvoiceAmount('')
       setShowCreateModal(false)
       setIsCreating(false)
       // Refresh invoices after confirmation
@@ -112,7 +120,41 @@ export default function InvoicesPage() {
         setRefreshKey(prev => prev + 1)
       }, 1000)
     }
-  }, [isConfirmed])
+  }, [isConfirmed, refetchInvoiceIds])
+
+  // Handle write contract errors (user rejection, insufficient funds, etc.)
+  useEffect(() => {
+    if (writeError) {
+      console.error('Write contract error:', writeError)
+      setIsCreating(false)
+      
+      // Handle specific error types
+      if (writeError.message.includes('User rejected')) {
+        toast.error('Transaction cancelled by user')
+      } else if (writeError.message.includes('insufficient funds')) {
+        toast.error('Insufficient funds for transaction')
+      } else {
+        toast.error('Transaction failed: ' + writeError.message)
+      }
+    }
+  }, [writeError])
+
+  // Handle transaction receipt errors
+  useEffect(() => {
+    if (receiptError) {
+      console.error('Transaction receipt error:', receiptError)
+      setIsCreating(false)
+      toast.error('Transaction failed to complete')
+    }
+  }, [receiptError])
+
+  // Reset creating state when transaction is no longer pending and not confirmed
+  useEffect(() => {
+    if (!isPending && !isConfirming && !isConfirmed && isCreating && !hash) {
+      // Transaction was cancelled or failed before getting a hash
+      setIsCreating(false)
+    }
+  }, [isPending, isConfirming, isConfirmed, isCreating, hash])
 
   // Fetch individual invoice details
   const fetchInvoiceDetails = async (invoiceId: bigint) => {
@@ -289,12 +331,12 @@ export default function InvoicesPage() {
 
   // Handle create invoice
   const handleCreateInvoice = async () => {
-    if (!createForm.name.trim()) {
+    if (!invoiceName.trim()) {
       toast.error('Please enter an invoice name')
       return
     }
     
-    if (!createForm.amount || parseFloat(createForm.amount) <= 0) {
+    if (!invoiceAmount || parseFloat(invoiceAmount) <= 0) {
       toast.error('Please enter a valid amount')
       return
     }
@@ -308,18 +350,18 @@ export default function InvoicesPage() {
     
     try {
       // Convert amount to wei (U2U uses same decimals as ETH)
-      const amountInWei = parseEther(createForm.amount)
+      const amountInWei = parseEther(invoiceAmount)
       
       // Call the contract
       writeContract({
         address: contractAddress as `0x${string}`,
         abi: InvoicesAbi.abi,
         functionName: 'createInvoice',
-        args: [createForm.name, createForm.details, amountInWei],
+        args: [invoiceName, invoiceDetails, amountInWei],
         chainId: chainId,
       })
       
-      toast.loading('Creating invoice... Please confirm the transaction')
+      // Note: Loading state is handled by the button's disabled state and text
     } catch (error: any) {
       console.error('Error creating invoice:', error)
       toast.error('Failed to create invoice')
@@ -355,6 +397,21 @@ export default function InvoicesPage() {
       : 'text-yellow-500'
   }
 
+  // Format address for display
+  const formatAddress = (address: string) => {
+    return `${address.slice(0, 6)}...${address.slice(-4)}`
+  }
+
+  // Copy address to clipboard
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast.success('Address copied to clipboard!')
+    }).catch(err => {
+      console.error('Failed to copy address: ', err)
+      toast.error('Failed to copy address')
+    })
+  }
+
   // Render a placeholder during server rendering and initial hydration
   if (!isMounted) {
     return (
@@ -374,6 +431,9 @@ export default function InvoicesPage() {
             onClick={() => {
               setShowCreateModal(false)
               setCreateForm({ name: '', details: '', amount: '' })
+              setInvoiceName('')
+              setInvoiceDetails('')
+              setInvoiceAmount('')
             }}
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           >
@@ -390,9 +450,9 @@ export default function InvoicesPage() {
             <input
               type="text"
               placeholder="e.g. Web Development Services"
-              value={createForm.name}
-              onChange={(e) => handleFormChange('name', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-transparent rounded text-sm"
+              value={invoiceName}
+              onChange={(e) => setInvoiceName(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-400/60 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
             />
           </div>
           
@@ -403,10 +463,10 @@ export default function InvoicesPage() {
             </label>
             <textarea
               placeholder="Describe the services or products..."
-              value={createForm.details}
-              onChange={(e) => handleFormChange('details', e.target.value)}
+              value={invoiceDetails}
+              onChange={(e) => setInvoiceDetails(e.target.value)}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-transparent rounded text-sm resize-none"
+             className="w-full px-3 py-2 border border-gray-400/60 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
             />
           </div>
           
@@ -420,9 +480,9 @@ export default function InvoicesPage() {
               placeholder="0.00"
               step="0.001"
               min="0"
-              value={createForm.amount}
-              onChange={(e) => handleFormChange('amount', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-transparent rounded text-sm"
+              value={invoiceAmount}
+              onChange={(e) => setInvoiceAmount(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-400/60 dark:border-gray-600/30 rounded-md bg-white/10 dark:bg-gray-700/10 backdrop-blur-md text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 dark:placeholder:text-gray-400"
             />
           </div>
         </div>
@@ -433,6 +493,9 @@ export default function InvoicesPage() {
             onClick={() => {
               setShowCreateModal(false)
               setCreateForm({ name: '', details: '', amount: '' })
+              setInvoiceName('')
+              setInvoiceDetails('')
+              setInvoiceAmount('')
             }}
             className="px-4 py-2 text-sm bg-red-500 hover:bg-red-600 text-white rounded transition-colors duration-200"
           >
@@ -440,7 +503,7 @@ export default function InvoicesPage() {
           </button>
           <button
             onClick={handleCreateInvoice}
-            disabled={!isConnected || isCreating || isPending || isConfirming || !createForm.name.trim() || !createForm.amount}
+            disabled={!isConnected || isCreating || isPending || isConfirming || !invoiceName.trim() || !invoiceAmount}
             className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded transition-colors duration-200 flex items-center"
           >
             {isCreating || isPending || isConfirming ? (
@@ -499,21 +562,22 @@ export default function InvoicesPage() {
       ) : (
         <div className="bg-white/50 dark:bg-gray-900/20 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
           {/* Table Header */}
-          <div className="grid grid-cols-7 gap-6 px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-transparent backdrop-blur-sm">
+          <div className="grid grid-cols-8 gap-6 px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-transparent backdrop-blur-sm">
             <div className="text-sm font-semibold text-gray-600 dark:text-gray-300">Invoice ID</div>
             <div className="text-sm font-semibold text-gray-600 dark:text-gray-300">Name</div>
             <div className="text-sm font-semibold text-gray-600 dark:text-gray-300">Details</div>
             <div className="text-sm font-semibold text-gray-600 dark:text-gray-300">Amount (U2U)</div>
             <div className="text-sm font-semibold text-gray-600 dark:text-gray-300">Status</div>
             <div className="text-sm font-semibold text-gray-600 dark:text-gray-300">Payee</div>
+            <div className="text-sm font-semibold text-gray-600 dark:text-gray-300">Payment Date</div>
             <div className="text-sm font-semibold text-gray-600 dark:text-gray-300 text-right">Actions</div>
           </div>
           
           {/* Table Rows */}
           <div className="max-h-96 overflow-y-auto">
             {invoices.map((invoice) => (
-              <div key={invoice.id} className="grid grid-cols-7 gap-6 px-6 py-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
-                <div className="text-sm font-mono text-gray-800 dark:text-gray-200">#{invoice.id}</div>
+              <div key={invoice.id} className="grid grid-cols-8 gap-6 px-6 py-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
+                <div className="text-sm font-mono text-gray-800 dark:text-gray-200">#22018{invoice.id}</div>
                 <div className="text-sm font-medium text-gray-800 dark:text-gray-200">{invoice.name}</div>
                 <div className="text-sm text-gray-600 dark:text-gray-400 truncate">{invoice.details}</div>
                 <div className="text-sm font-medium text-gray-800 dark:text-gray-200">{formatEther(invoice.amount)} U2U</div>
@@ -526,7 +590,34 @@ export default function InvoicesPage() {
                     )}
                   </span>
                 </div>
-                <div className="text-sm text-gray-800 dark:text-gray-200 font-mono">{invoice.isPaid ? invoice.paidBy : 'Pending'}</div>
+                <div className="flex items-center gap-1">
+                  {invoice.isPaid ? (
+                    <>
+                      <span className="text-sm text-gray-800 dark:text-gray-200 font-mono">
+                        {formatAddress(invoice.paidBy)}
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          copyToClipboard(invoice.paidBy);
+                        }}
+                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-0.5 rounded"
+                        title="Copy full address"
+                      >
+                        <Copy className="h-3 w-3" />
+                      </button>
+                    </>
+                  ) : (
+                    <span className="text-sm text-gray-800 dark:text-gray-200 font-mono">Pending</span>
+                  )}
+                </div>
+                <div className="text-sm text-gray-800 dark:text-gray-200">
+                  {invoice.isPaid && invoice.paidAt && invoice.paidAt > BigInt(0) ? (
+                    formatDate(invoice.paidAt)
+                  ) : (
+                    <span className="text-gray-500 dark:text-gray-400">-</span>
+                  )}
+                </div>
                 <div className="flex justify-end space-x-2">
                   {!invoice.isPaid && (
                     <button onClick={() => copyPaymentLink(invoice.id)} className="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors rounded" title="Copy payment link">
