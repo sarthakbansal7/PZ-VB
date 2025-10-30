@@ -10,6 +10,8 @@ import { toast } from "react-hot-toast"
 import Link from 'next/link'
 import { PaymentConfigProvider, usePaymentConfig } from '@/context/paymentConfigContext'
 import ConfigurePayModal from '@/components/payroll/ConfigurePayModal'
+import AirdropSuccessModal from '@/components/ui/AirdropSuccessModal'
+import ClaimSuccessModal from '@/components/ui/ClaimSuccessModal'
 import { getAirdropAddress, NATIVE_TOKEN_ADDRESS } from '@/lib/contract-addresses'
 import airdropAbi from '@/lib/AirdropAbi.json'
 
@@ -48,7 +50,7 @@ function AirdropPage() {
   const [isMounted, setIsMounted] = useState(false)
   
   // State for Create Airdrop tab
-  const [selectedToken, setSelectedToken] = useState<string>('U2U')
+  const [selectedToken, setSelectedToken] = useState<string>('FLOW')
   const [customTokens, setCustomTokens] = useState<CustomToken[]>([])
   const [showCustomTokenModal, setShowCustomTokenModal] = useState(false)
   const [recipients, setRecipients] = useState<AirdropRecipient[]>([]) // Start with empty array
@@ -82,22 +84,66 @@ function AirdropPage() {
   // Contract hooks
   const { writeContractAsync } = useWriteContract()
   const [pendingTxHash, setPendingTxHash] = useState<`0x${string}` | undefined>()
+  const [isPending, setIsPending] = useState(false)
+  
+  // Success modal states
+  const [showAirdropSuccessModal, setShowAirdropSuccessModal] = useState(false)
+  const [showClaimSuccessModal, setShowClaimSuccessModal] = useState(false)
+  const [airdropSuccessData, setAirdropSuccessData] = useState<{
+    hash: string;
+    totalAmount: string;
+    recipientCount: number;
+    tokenSymbol: string;
+  } | null>(null)
+  const [claimSuccessData, setClaimSuccessData] = useState<{
+    hash: string;
+    claimedAmount: string;
+    tokenSymbol: string;
+  } | null>(null)
   
   // Get airdrop contract address for current network
   const airdropContractAddress = getAirdropAddress(chainId)
   
+  // Wait for transaction receipt
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash: pendingTxHash,
+  })
+
   // Debug network information
   useEffect(() => {
     console.log('=== AIRDROP NETWORK DEBUG ===')
     console.log('Chain ID:', chainId)
     console.log('Airdrop Contract Address:', airdropContractAddress)
-    console.log('Is Mainnet (39):', chainId === 39)
-    console.log('Is Testnet (2484):', chainId === 2484)
+    console.log('Is Flow Mainnet (747):', chainId === 747)
+    console.log('Is Flow Testnet (545):', chainId === 545)
   }, [chainId, airdropContractAddress])
+
+  // Handle transaction confirmation
+  useEffect(() => {
+    if (isConfirmed && pendingTxHash && airdropSuccessData) {
+      setShowAirdropSuccessModal(true)
+      setPendingTxHash(undefined)
+      setIsCreating(false)
+      setIsPending(false)
+      // Reset form data after showing success modal
+      setTimeout(() => {
+        setRecipients([])
+      }, 1000)
+      // Refetch balances
+      refetchNative()
+    }
+  }, [isConfirmed, pendingTxHash, airdropSuccessData])
+
+  // Reset states when no pending transaction
+  useEffect(() => {
+    if (!pendingTxHash && !isConfirming) {
+      setIsPending(false)
+    }
+  }, [pendingTxHash, isConfirming])
 
   // Check if contract is available on current network
   const isContractAvailable = !!airdropContractAddress
-  const networkName = chainId === 39 ? 'U2U Mainnet' : chainId === 2484 ? 'U2U Testnet' : 'Unknown Network'
+  const networkName = chainId === 747 ? 'Flow EVM Mainnet' : chainId === 545 ? 'Flow EVM Testnet' : 'Unknown Network'
 
   // Read native token claimable amount
   const { data: nativeClaimableAmount, refetch: refetchNative } = useReadContract({
@@ -113,7 +159,7 @@ function AirdropPage() {
 
   // Helper functions
   const getTokenAddress = (tokenSymbol: string): string => {
-    if (tokenSymbol === 'U2U') {
+    if (tokenSymbol === 'FLOW') {
       return NATIVE_TOKEN_ADDRESS
     }
     const customToken = customTokens.find(token => token.symbol === tokenSymbol)
@@ -122,7 +168,7 @@ function AirdropPage() {
 
   const getTokenSymbol = (tokenAddress: string): string => {
     if (tokenAddress === NATIVE_TOKEN_ADDRESS) {
-      return 'U2U'
+      return 'FLOW'
     }
     const customToken = customTokens.find(token => token.address.toLowerCase() === tokenAddress.toLowerCase())
     return customToken?.symbol || 'Unknown'
@@ -145,7 +191,7 @@ function AirdropPage() {
       if (nativeClaimableAmount && BigInt(nativeClaimableAmount as any) > BigInt(0)) {
         newClaimableAirdrops.push({
           token: NATIVE_TOKEN_ADDRESS,
-          tokenSymbol: 'U2U',
+          tokenSymbol: 'FLOW',
           amount: formatUnits(nativeClaimableAmount as bigint, 18),
           rawAmount: nativeClaimableAmount as bigint,
         })
@@ -213,7 +259,7 @@ function AirdropPage() {
       if (nativeAmount && BigInt(nativeAmount as any) > BigInt(0)) {
         claimableAirdrops.push({
           token: NATIVE_TOKEN_ADDRESS,
-          tokenSymbol: 'U2U',
+          tokenSymbol: 'FLOW',
           amount: formatUnits(nativeAmount as bigint, 18),
           rawAmount: nativeAmount as bigint,
         })
@@ -281,6 +327,7 @@ function AirdropPage() {
 
     try {
       setIsCreating(true)
+      setIsPending(true)
       
       // Prepare contract parameters
       const tokenAddress = getTokenAddress(selectedToken)
@@ -310,11 +357,19 @@ function AirdropPage() {
       })
 
       setPendingTxHash(txHash)
+      setIsPending(false) // Transaction sent successfully
+      
+      // Prepare success modal data
+      setAirdropSuccessData({
+        hash: txHash,
+        totalAmount: totalAmount,
+        recipientCount: validRecipients.length,
+        tokenSymbol: selectedToken,
+      })
+      
       toast.success(`Airdrop transaction sent! Hash: ${txHash}`)
       
-      // Reset form
-      setRecipients([])
-      setTotalAmount('0')
+      // Don't reset form immediately - wait for confirmation
       
       // Refresh history after a delay
       setTimeout(() => {
@@ -324,6 +379,7 @@ function AirdropPage() {
     } catch (error: any) {
       console.error('Airdrop creation error:', error)
       toast.error(error.message || 'Failed to create airdrop')
+      setIsPending(false)
     } finally {
       setIsCreating(false)
     }
@@ -353,6 +409,14 @@ function AirdropPage() {
       })
 
       toast.success(`Claim transaction sent! Hash: ${txHash}`)
+      
+      // Show claim success modal
+      setClaimSuccessData({
+        hash: txHash,
+        claimedAmount: airdrop.amount,
+        tokenSymbol: airdrop.tokenSymbol,
+      })
+      setShowClaimSuccessModal(true)
       
       // Remove claimed airdrop from list immediately for better UX
       setClaimableAirdrops(prev => prev.filter(a => a.token !== airdrop.token))
@@ -456,14 +520,16 @@ function AirdropPage() {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setShowBulkUploadModal(true)}
-              className="flex items-center px-3 py-1.5 text-sm bg-white hover:bg-gray-100 dark:bg-transparent dark:hover:bg-gray-900 text-black dark:text-white transition-colors duration-200 border border-gray-300 dark:border-gray-600"
+              disabled={isCreating || isPending || isConfirming}
+              className="flex items-center px-3 py-1.5 text-sm bg-white hover:bg-gray-100 dark:bg-transparent dark:hover:bg-gray-900 text-black dark:text-white transition-colors duration-200 border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Upload className="h-4 w-4 mr-1" />
               Bulk Upload
             </button>
             <button
               onClick={() => setShowAddRecipientModal(true)}
-              className="flex items-center px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-200"
+              disabled={isCreating || isPending || isConfirming}
+              className="flex items-center px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus className="h-4 w-4 mr-1" />
               Add Recipient
@@ -480,7 +546,7 @@ function AirdropPage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-0">
+          <div className="space-y-0 relative">
             {/* Table Header */}
             <div className="grid grid-cols-4 gap-6 px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
               <div className="text-sm font-semibold text-gray-600 dark:text-gray-300">Recipient Address</div>
@@ -503,23 +569,31 @@ function AirdropPage() {
                     {selectedToken}
                   </div>
                   <div className="flex justify-end space-x-2">
-                    <button
-                      onClick={() => {
-                        setEditingIndex(index)
-                        setShowAddRecipientModal(true)
-                      }}
-                      className="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors rounded"
-                      title="Edit recipient"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => removeRecipient(index)}
-                      className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors rounded"
-                      title="Delete recipient"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    {isCreating || isPending || isConfirming ? (
+                      <div className="text-xs text-blue-600 dark:text-blue-400 font-medium py-2">
+                        {isPending ? 'Confirming...' : isConfirming ? 'Processing...' : 'Creating...'}
+                      </div>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => {
+                            setEditingIndex(index)
+                            setShowAddRecipientModal(true)
+                          }}
+                          className="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors rounded"
+                          title="Edit recipient"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => removeRecipient(index)}
+                          className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors rounded"
+                          title="Delete recipient"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}
@@ -651,7 +725,7 @@ function AirdropPage() {
                     onChange={(e) => handleTokenSelection(e.target.value)}
                     className="px-4 py-2 pr-8 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-transparent dark:text-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg appearance-none cursor-pointer shadow-sm"
                   >
-                    <option value="U2U" className="bg-transparent text-black dark:text-white">U2U (Native)</option>
+                    <option value="FLOW" className="bg-transparent text-black dark:text-white">FLOW (Native)</option>
                     {customTokens.map((token) => (
                       <option key={token.symbol} value={token.symbol} className="bg-white dark:bg-gray-800 text-black dark:text-white">
                         {token.symbol}
@@ -715,7 +789,7 @@ function AirdropPage() {
                       Airdrop Contract Not Available
                     </h3>
                     <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
-                      The airdrop contract is not deployed on {networkName}. Please switch to U2U Mainnet or U2U Testnet to use this feature.
+                      The airdrop contract is not deployed on {networkName}. Please switch to Flow EVM Mainnet or Flow EVM Testnet to use this feature.
                     </p>
                   </div>
                 </div>
@@ -740,7 +814,7 @@ function AirdropPage() {
                     Airdrop Feature Unavailable
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Please switch to U2U Mainnet or U2U Testnet to use the airdrop feature.
+                    Please switch to Flow EVM Mainnet or Flow EVM Testnet to use the airdrop feature.
                   </p>
                 </div>
               )}
@@ -845,6 +919,31 @@ function AirdropPage() {
         />
       )}
 
+      {/* Airdrop Success Modal */}
+      {showAirdropSuccessModal && airdropSuccessData && (
+        <AirdropSuccessModal
+          isOpen={showAirdropSuccessModal}
+          onClose={() => setShowAirdropSuccessModal(false)}
+          transactionHash={airdropSuccessData.hash}
+          totalAmount={airdropSuccessData.totalAmount}
+          recipientCount={airdropSuccessData.recipientCount}
+          tokenSymbol={airdropSuccessData.tokenSymbol}
+          explorerUrl={`https://evm.flowscan.io/tx/${airdropSuccessData.hash}`}
+        />
+      )}
+
+      {/* Claim Success Modal */}
+      {showClaimSuccessModal && claimSuccessData && (
+        <ClaimSuccessModal
+          isOpen={showClaimSuccessModal}
+          onClose={() => setShowClaimSuccessModal(false)}
+          transactionHash={claimSuccessData.hash}
+          claimedAmount={claimSuccessData.claimedAmount}
+          tokenSymbol={claimSuccessData.tokenSymbol}
+          explorerUrl={`https://evm.flowscan.io/tx/${claimSuccessData.hash}`}
+        />
+      )}
+
       {/* Custom Token Modal */}
       {showCustomTokenModal && (
         <CustomTokenModal
@@ -852,6 +951,30 @@ function AirdropPage() {
           onClose={() => setShowCustomTokenModal(false)}
           onAddToken={handleAddCustomToken}
         />
+      )}
+
+      {/* Processing Modal */}
+      {(isCreating || isPending || isConfirming) && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-black rounded-xl p-8 shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col items-center min-w-[300px]">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
+            <p className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              {isPending ? 'Confirming Transaction...' : isConfirming ? 'Processing Airdrop...' : 'Creating Airdrop...'}
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-sm">
+              {isPending 
+                ? 'Please confirm the transaction in your wallet to proceed with the airdrop.' 
+                : isConfirming 
+                  ? 'Your airdrop is being processed on the Flow blockchain. This may take a few moments.'
+                  : 'Preparing your airdrop transaction. Please wait...'}
+            </p>
+            {isConfirming && (
+              <div className="mt-4 text-xs text-blue-600 dark:text-blue-400 text-center">
+                Transaction submitted to blockchain
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   )
@@ -1219,7 +1342,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               </div>
               <div>
                 <span className="text-sm text-gray-600 dark:text-gray-400">Network:</span>
-                <p className="font-semibold text-lg dark:text-white">U2U</p>
+                <p className="font-semibold text-lg dark:text-white">FLOW</p>
               </div>
             </div>
           </div>
