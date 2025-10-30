@@ -15,41 +15,31 @@ export interface NetworkContracts {
   [chainId: number]: ContractAddresses;
 }
 
-// U2U Mainnet Chain ID
-export const U2U_MAINNET_CHAIN_ID = 39;
-// U2U Testnet Chain ID
-export const U2U_TESTNET_CHAIN_ID = 2484;
+// Flow EVM Chain IDs
+export const FLOW_MAINNET_CHAIN_ID = 747;
+export const FLOW_TESTNET_CHAIN_ID = 545;
 
 // Contract addresses for different networks
 export const CONTRACT_ADDRESSES: NetworkContracts = {
-  // U2U Mainnet
-  [U2U_MAINNET_CHAIN_ID]: {
-    bulkTransfer: "0xbb7E1b1Ef5c36fC4aE96879Ea3c4586B68569cAC",
-    airdrop: "0xDfcB96A9A5744CdfB173C36849Af5bD7343DAb7E",
-    payroll: "0x463c2b415329e199a936381b09b7499e7E68d7F9",
-    stream: "0x41353BAFF99bAB4AfE2bb6acF040C8C75B80137f",
-    invoices: "0x0A51554c3a743A62fcb6a633cf04CB2e0cd14169",
+  // Flow EVM Mainnet
+  [FLOW_MAINNET_CHAIN_ID]: {
+    airdrop: "0x563442Ec415De8444059A46fc09F0F552AE8661a", // Placeholder - update with actual mainnet addresses
+    bulkTransfer: "0xDfcB96A9A5744CdfB173C36849Af5bD7343DAb7E", // Placeholder - update with actual mainnet addresses
+    stream: "0xbb7E1b1Ef5c36fC4aE96879Ea3c4586B68569cAC", // Placeholder - update with actual mainnet addresses
+    payroll: "0x0A51554c3a743A62fcb6a633cf04CB2e0cd14169", // Placeholder - update with actual mainnet addresses
+    invoices: "0x41353BAFF99bAB4AfE2bb6acF040C8C75B80137f", // Placeholder - update with actual mainnet addresses
   },
-  
-  // U2U Testnet
-  [U2U_TESTNET_CHAIN_ID]: {
-    bulkTransfer: "0x071A4FCcEEe657c8d4729F664957e1777f6A719E",
+  // Flow EVM Testnet
+  [FLOW_TESTNET_CHAIN_ID]: {
     airdrop: "0x563442Ec415De8444059A46fc09F0F552AE8661a",
-    payroll: "0xbb7E1b1Ef5c36fC4aE96879Ea3c4586B68569cAC",
-    stream: "0x463c2b415329e199a936381b09b7499e7E68d7F9",
-    invoices: "0x288dB1ee3701C3215F4dA5BF1A0d3B2CC8a8185f",
+    bulkTransfer: "0xDfcB96A9A5744CdfB173C36849Af5bD7343DAb7E",
+    stream: "0xbb7E1b1Ef5c36fC4aE96879Ea3c4586B68569cAC",
+    payroll: "0x0A51554c3a743A62fcb6a633cf04CB2e0cd14169",
+    invoices: "0x41353BAFF99bAB4AfE2bb6acF040C8C75B80137f",
   },
-  
-  // Add more networks as needed
-  // 1: { // Ethereum Mainnet
-  //   bulkTransfer: "0x...",
-  // },
-  // 137: { // Polygon
-  //   bulkTransfer: "0x...",
-  // },
 };
 
-// Native token address (used for ETH/U2U transfers)
+// Native token address (used for ETH/FLOW transfers)
 export const NATIVE_TOKEN_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 // Helper function to get contract address for current chain

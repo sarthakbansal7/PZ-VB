@@ -1,31 +1,31 @@
 import { defineChain } from 'viem'
 export const NATIVE_ADDRESS = `0x0000000000000000000000000000000000000000`
 
-export const u2uMainnet = defineChain({
-    id: 39,
-    name: 'U2U Solaris Mainnet',
-    nativeCurrency: { decimals: 18, name: 'U2U', symbol: 'U2U' },
+export const flowMainnet = defineChain({
+    id: 747,
+    name: 'Flow EVM Mainnet',
+    nativeCurrency: { decimals: 18, name: 'FLOW', symbol: 'FLOW' },
     rpcUrls: {
-        default: { http: ['https://rpc-mainnet.u2u.xyz'] },
+        default: { http: ['https://mainnet.evm.nodes.onflow.org'] },
     },
     blockExplorers: {
-        default: { name: 'U2UScan', url: 'https://u2uscan.xyz' },
+        default: { name: 'FlowScan', url: 'https://evm.flowscan.io' },
     },
 })
 
-export const u2uTestnet = defineChain({
-    id: 2484,
-    name: 'Unicorn Ultra Nebulas Testnet',
-    nativeCurrency: { decimals: 18, name: 'U2U', symbol: 'U2U' },
+export const flowTestnet = defineChain({
+    id: 545,
+    name: 'Flow EVM Testnet',
+    nativeCurrency: { decimals: 18, name: 'FLOW', symbol: 'FLOW' },
     rpcUrls: {
-        default: { http: ['https://rpc-nebulas-testnet.u2u.xyz'] },
+        default: { http: ['https://testnet.evm.nodes.onflow.org'] },
     },
     blockExplorers: {
-        default: { name: 'U2UScan Testnet', url: 'https://testnet.u2uscan.xyz' },
+        default: { name: 'FlowScan Testnet', url: 'https://evm-testnet.flowscan.io' },
     },
 })
 
 export const allMainnetChains = [
-    u2uMainnet,
-    u2uTestnet
+    flowMainnet,
+    flowTestnet
 ]

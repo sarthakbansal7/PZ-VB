@@ -76,13 +76,13 @@ const BulkPayoutPage: React.FC = () => {
     console.log('=== BULK TRANSFER NETWORK DEBUG ===');
     console.log('Chain ID:', currentChainId);
     console.log('BulkTransfer Contract Address:', getTransferContract());
-    console.log('Is Mainnet (39):', currentChainId === 39);
-    console.log('Is Testnet (2484):', currentChainId === 2484);
+    console.log('Is Flow Mainnet (747):', currentChainId === 747);
+    console.log('Is Flow Testnet (545):', currentChainId === 545);
   }, [currentChainId]);
   
   // Check if contract is available on current network
   const isContractAvailable = !!getTransferContract();
-  const networkName = currentChainId === 39 ? 'U2U Mainnet' : currentChainId === 2484 ? 'U2U Testnet' : 'Unknown Network';
+  const networkName = currentChainId === 747 ? 'Flow EVM Mainnet' : currentChainId === 545 ? 'Flow EVM Testnet' : 'Unknown Network';
   const { writeContractAsync, isPending: isWritePending, data: wagmiTxHash } = useWriteContract();
   const { isLoading: isTxLoading, isSuccess: isTxSuccess, isError: isTxError } =
     useWaitForTransactionReceipt({ hash: wagmiTxHash });
@@ -558,7 +558,7 @@ const BulkPayoutPage: React.FC = () => {
                     Bulk Transfer Contract Not Available
                   </h3>
                   <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
-                    The bulk transfer contract is not deployed on {networkName}. Please switch to U2U Mainnet or U2U Testnet to use this feature.
+                    The bulk transfer contract is not deployed on {networkName}. Please switch to Flow EVM Mainnet or Flow EVM Testnet to use this feature.
                   </p>
                 </div>
               </div>

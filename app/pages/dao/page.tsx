@@ -79,13 +79,13 @@ const PaymentsPage: React.FC = () => {
     console.log('=== PAYROLL NETWORK DEBUG ===');
     console.log('Chain ID:', currentChainId);
     console.log('Payroll Contract Address:', getTransferContract());
-    console.log('Is Mainnet (39):', currentChainId === 39);
-    console.log('Is Testnet (2484):', currentChainId === 2484);
+    console.log('Is Flow Mainnet (747):', currentChainId === 747);
+    console.log('Is Flow Testnet (545):', currentChainId === 545);
   }, [currentChainId]);
   
   // Check if contract is available on current network
   const isContractAvailable = !!getTransferContract();
-  const networkName = currentChainId === 39 ? 'U2U Mainnet' : currentChainId === 2484 ? 'U2U Testnet' : 'Unknown Network';
+  const networkName = currentChainId === 747 ? 'Flow EVM Mainnet' : currentChainId === 545 ? 'Flow EVM Testnet' : 'Unknown Network';
   const { writeContractAsync, isPending: isWritePending, data: wagmiTxHash } = useWriteContract();
   const { isLoading: isTxLoading, isSuccess: isTxSuccess, isError: isTxError } =
     useWaitForTransactionReceipt({ hash: wagmiTxHash });
@@ -241,8 +241,8 @@ const PaymentsPage: React.FC = () => {
       .reduce((sum, emp) => sum + parseFloat(emp.salary), 0);
     
     const totalTokenAmount = usdToToken(totalUsd.toString());
-    // For U2U chain (id 39) and native token, ensure we use 18 decimals
-    const decimals = currentChainId === 39 && selectedToken.address === NATIVE_ADDRESS 
+    // For Flow networks and native token, ensure we use 18 decimals
+    const decimals = (currentChainId === 747 || currentChainId === 545) && selectedToken.address === NATIVE_ADDRESS 
       ? 18 
       : selectedToken.decimals;
     return parseUnits(totalTokenAmount, decimals);
@@ -256,8 +256,8 @@ const PaymentsPage: React.FC = () => {
       recipients: selectedEmployeeData.map(emp => emp.wallet as `0x${string}`),
       amounts: selectedEmployeeData.map(emp => {
         const tokenAmount = usdToToken(emp.salary);
-        // For U2U chain (id 39) and native token, ensure we use 18 decimals
-        const decimals = currentChainId === 39 && selectedToken.address === NATIVE_ADDRESS 
+        // For Flow networks and native token, ensure we use 18 decimals
+        const decimals = (currentChainId === 747 || currentChainId === 545) && selectedToken.address === NATIVE_ADDRESS 
           ? 18 
           : selectedToken.decimals;
         return parseUnits(tokenAmount, decimals);
@@ -358,11 +358,11 @@ const PaymentsPage: React.FC = () => {
     totalAmount: bigint
   ) => {
     setIsSending(true);
-    console.log('Sending payroll transaction with native U2U token...');
+    console.log('Sending payroll transaction with native FLOW token...');
 
     try {
       // Always use native token transfer (address(0))
-      console.log('Sending native U2U token transfer via payroll contract');
+      console.log('Sending native FLOW token transfer via payroll contract');
       const finalTxHash = await writeContractAsync({
         address: transferContractAddress as `0x${string}`,
         abi: payrollAbi.abi,
@@ -528,7 +528,7 @@ const PaymentsPage: React.FC = () => {
                     Payroll Contract Not Available
                   </h3>
                   <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
-                    The payroll contract is not deployed on {networkName}. Please switch to U2U Mainnet or U2U Testnet to use this feature.
+                    The payroll contract is not deployed on {networkName}. Please switch to Flow EVM Mainnet or Flow EVM Testnet to use this feature.
                   </p>
                 </div>
               </div>

@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
+import { RainbowKitProvider, darkTheme, connectorsForWallets } from '@rainbow-me/rainbowkit';
 import { WagmiProvider } from 'wagmi';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import '@rainbow-me/rainbowkit/styles.css';
@@ -20,7 +20,10 @@ export default function AirdropLayout({
             <AuroraBackground>
                 <WagmiProvider config={config}>
                     <QueryClientProvider client={queryClient}>
-                        <RainbowKitProvider theme={darkTheme()}>
+                        <RainbowKitProvider 
+                            theme={darkTheme()}
+                            showRecentTransactions={true}
+                        >
                             {children}
                         </RainbowKitProvider>
                     </QueryClientProvider>

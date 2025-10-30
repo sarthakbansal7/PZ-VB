@@ -1312,7 +1312,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/25 backdrop-blur-lg flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-full max-w-2xl mx-4 shadow-xl max-h-[80vh] overflow-hidden flex flex-col">
+      <div className="bg-white dark:bg-black rounded-lg p-6 w-full max-w-2xl mx-4 shadow-xl max-h-[80vh] overflow-hidden flex flex-col">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-semibold dark:text-white">Confirm Airdrop Details</h3>
           <button
@@ -1325,7 +1325,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         
         <div className="space-y-6 flex-1 overflow-y-auto">
           {/* Summary Section */}
-          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+          <div className="bg-blue-50 dark:bg-black rounded-lg p-4">
             <h4 className="text-lg font-medium dark:text-white mb-3">Airdrop Summary</h4>
             <div className="grid grid-cols-2 gap-4">
               <div>

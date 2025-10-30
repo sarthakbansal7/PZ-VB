@@ -83,13 +83,13 @@ function InvoicesPageContent() {
     console.log('=== INVOICES NETWORK DEBUG ===')
     console.log('Chain ID:', chainId)
     console.log('Invoices Contract Address:', contractAddress)
-    console.log('Is Mainnet (39):', chainId === 39)
-    console.log('Is Testnet (2484):', chainId === 2484)
+    console.log('Is Flow Mainnet (747):', chainId === 747)
+    console.log('Is Flow Testnet (545):', chainId === 545)
   }, [chainId, contractAddress])
   
   // Check if contract is available on current network
   const isContractAvailable = !!contractAddress
-  const networkName = chainId === 39 ? 'U2U Mainnet' : chainId === 2484 ? 'U2U Testnet' : 'Unknown Network'
+  const networkName = chainId === 747 ? 'Flow EVM Mainnet' : chainId === 545 ? 'Flow EVM Testnet' : 'Unknown Network'
   
   // Read contract to get invoices by creator
   const { data: invoiceIds, refetch: refetchInvoiceIds } = useReadContract({
@@ -304,7 +304,7 @@ function InvoicesPageContent() {
       setInvoices(validInvoices)
       
       if (validInvoices.length > 0) {
-        toast.success(`Loaded ${validInvoices.length} invoice(s)`)
+       // toast.success(`Loaded ${validInvoices.length} invoice(s)`)
       }
     } catch (error) {
       console.error('Error fetching invoices:', error)
@@ -359,7 +359,7 @@ function InvoicesPageContent() {
     setIsCreating(true)
     
     try {
-      // Convert amount to wei (U2U uses same decimals as ETH)
+      // Convert amount to wei (FLOW uses same decimals as ETH)
       const amountInWei = parseEther(invoiceAmount)
       
       // Call the contract
@@ -381,8 +381,8 @@ function InvoicesPageContent() {
 
   // Copy payment link to clipboard
   const copyPaymentLink = (invoiceId: bigint) => {
-    // Add network suffix: 'm' for mainnet (39), 't' for testnet (2484)
-    const networkSuffix = chainId === 39 ? 'm' : chainId === 2484 ? 't' : 't' // default to testnet
+    // Add network suffix: 'm' for mainnet (747), 't' for testnet (545)
+    const networkSuffix = chainId === 747 ? 'm' : chainId === 545 ? 't' : 't' // default to testnet
     const paymentUrl = `${window.location.origin}/pages/pay/${invoiceId.toString()}${networkSuffix}`
     navigator.clipboard.writeText(paymentUrl)
     toast.success('Payment link copied to clipboard!')
@@ -485,7 +485,7 @@ function InvoicesPageContent() {
           {/* Amount */}
           <div>
             <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">
-              Amount (U2U) *
+              Amount (FLOW) *
             </label>
             <input
               type="number"
@@ -578,7 +578,7 @@ function InvoicesPageContent() {
             <div className="text-sm font-semibold text-gray-600 dark:text-gray-300">Invoice ID</div>
             <div className="text-sm font-semibold text-gray-600 dark:text-gray-300">Name</div>
             <div className="text-sm font-semibold text-gray-600 dark:text-gray-300">Details</div>
-            <div className="text-sm font-semibold text-gray-600 dark:text-gray-300">Amount (U2U)</div>
+            <div className="text-sm font-semibold text-gray-600 dark:text-gray-300">Amount (FLOW)</div>
             <div className="text-sm font-semibold text-gray-600 dark:text-gray-300">Status</div>
             <div className="text-sm font-semibold text-gray-600 dark:text-gray-300">Payee</div>
             <div className="text-sm font-semibold text-gray-600 dark:text-gray-300">Payment Date</div>
@@ -592,7 +592,7 @@ function InvoicesPageContent() {
                 <div className="text-sm font-mono text-gray-800 dark:text-gray-200">#22018{invoice.id}</div>
                 <div className="text-sm font-medium text-gray-800 dark:text-gray-200">{invoice.name}</div>
                 <div className="text-sm text-gray-600 dark:text-gray-400 truncate">{invoice.details}</div>
-                <div className="text-sm font-medium text-gray-800 dark:text-gray-200">{formatEther(invoice.amount)} U2U</div>
+                <div className="text-sm font-medium text-gray-800 dark:text-gray-200">{formatEther(invoice.amount)} FLOW</div>
                 <div>
                   <span className={`text-xs font-medium ${getStatusColor(invoice.isPaid)}`}>
                     {invoice.isPaid ? (
@@ -636,7 +636,7 @@ function InvoicesPageContent() {
                       <Copy className="h-4 w-4" />
                     </button>
                   )}
-                  <Link href={`/pages/pay/${invoice.id.toString()}${chainId === 39 ? 'm' : chainId === 2484 ? 't' : 't'}`}>
+                  <Link href={`/pages/pay/${invoice.id.toString()}${chainId === 747 ? 'm' : chainId === 545 ? 't' : 't'}`}>
                     <button className="p-2 text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors rounded" title="View invoice">
                       <Eye className="h-4 w-4" />
                     </button>
@@ -700,7 +700,7 @@ function InvoicesPageContent() {
                       Invoices Contract Not Available
                     </h3>
                     <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
-                      The invoices contract is not deployed on {networkName}. Please switch to U2U Mainnet or U2U Testnet to use this feature.
+                      The invoices contract is not deployed on {networkName}. Please switch to Flow EVM Mainnet or Flow EVM Testnet to use this feature.
                     </p>
                   </div>
                 </div>
@@ -722,7 +722,7 @@ function InvoicesPageContent() {
                     Invoices Feature Unavailable
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Please switch to U2U Mainnet or U2U Testnet to use the invoices feature.
+                    Please switch to Flow EVM Mainnet or Flow EVM Testnet to use the invoices feature.
                   </p>
                 </div>
               )}

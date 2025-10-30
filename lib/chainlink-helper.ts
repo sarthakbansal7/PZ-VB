@@ -118,7 +118,7 @@ export const chainlinkAggregatorABI = [
 
 // Token symbol to CoinGecko ID mapping
 const tokenToCoingeckoId: { [key: string]: string } = {
-    'U2U': 'unicorn-ultra',
+    'FLOW': 'flow',
     'ETH': 'ethereum',
     'BNB': 'binancecoin',
     'tBNB': 'binancecoin', // Use same ID for testnet
@@ -175,44 +175,7 @@ async function fetchPriceFromCoinGecko(tokenSymbol: string): Promise<number | nu
     }
 }
 
-// Dedicated function to fetch U2U token price from CoinGecko
-export async function getU2UPrice(): Promise<{ price: number, exchangeRate: number } | null> {
-    try {
-        const apiUrl = `https://api.coingecko.com/api/v3/simple/price?ids=unicorn-ultra&vs_currencies=usd`;
-        const response = await fetch(apiUrl, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-            },
-            cache: 'no-store' // Ensure we get fresh data
-        });
 
-        if (!response.ok) {
-            console.warn(`CoinGecko API response not OK: ${response.status}`);
-            return null;
-        }
-
-        const data = await response.json();
-        if (!data['unicorn-ultra'] || !data['unicorn-ultra'].usd) {
-            console.warn(`No price data found for U2U token`);
-            return null;
-        }
-
-        const price = data['unicorn-ultra'].usd; // U2U price in USD
-        const exchangeRate = 1 / price; // How many U2U tokens = 1 USD
-
-        console.log(`U2U Token Price: $${price} USD`);
-        console.log(`Exchange Rate: 1 USD = ${exchangeRate} U2U`);
-
-        return {
-            price: price,
-            exchangeRate: exchangeRate
-        };
-    } catch (error) {
-        console.error(`Error fetching U2U price from CoinGecko:`, error);
-        return null;
-    }
-}
 
 // Get exchange rate from USD to Token (inverse of price feed)
 export async function getExchangeRate(
@@ -281,13 +244,13 @@ export async function getExchangeRate(
 
         // For other tokens, return reasonable fallback based on symbol
         const fallbackRates: { [key: string]: number } = {
-            'U2U': 161.127636,      // 1 USD ≈ 0.006 U2U (fallback rate)
-            'ETH': 0.001,    // 1 USD ≈ 0.0005 ETH
-            'BNB': 0.001,     // 1 USD ≈ 0.003 BNB
-            'tBNB': 0.001,    // Testnet BNB same as BNB
-            'MATIC': 0.001,     // 1 USD ≈ 0.8 MATIC
-            'AVAX': 0.001,     // 1 USD ≈ 0.04 AVAX
-            'EDU': 0.001,       // 1 USD ≈ 1.5 EDU (example)
+            'FLOW': 8.0,            // 1 USD ≈ 8.0 FLOW (fallback rate based on ~$0.125 FLOW price)
+            'ETH': 0.0003,          // 1 USD ≈ 0.0003 ETH
+            'BNB': 0.001,           // 1 USD ≈ 0.001 BNB
+            'tBNB': 0.001,          // Testnet BNB same as BNB
+            'MATIC': 0.001,         // 1 USD ≈ 0.001 MATIC
+            'AVAX': 0.001,          // 1 USD ≈ 0.001 AVAX
+            'EDU': 0.001,           // 1 USD ≈ 0.001 EDU
             'ZOLLPTT': 1
         };
 
@@ -301,13 +264,13 @@ export async function getExchangeRate(
         }
 
         const emergencyFallbackRates: { [key: string]: number } = {
-            'U2U': 161.127636,      // 1 USD ≈ 0.006 U2U (emergency fallback)
-            'ETH': 0.001,    // 1 USD ≈ 0.0005 ETH
-            'BNB': 0.001,     // 1 USD ≈ 0.003 BNB
-            'tBNB': 0.001,    // Testnet BNB same as BNB
-            'MATIC': 0.001,     // 1 USD ≈ 0.8 MATIC
-            'AVAX': 0.001,     // 1 USD ≈ 0.04 AVAX
-            'EDU': 0.001,       // 1 USD ≈ 1.5 EDU (example)
+            'FLOW': 8.0,            // 1 USD ≈ 8.0 FLOW (emergency fallback)
+            'ETH': 0.0003,          // 1 USD ≈ 0.0003 ETH
+            'BNB': 0.001,           // 1 USD ≈ 0.001 BNB
+            'tBNB': 0.001,          // Testnet BNB same as BNB
+            'MATIC': 0.001,         // 1 USD ≈ 0.001 MATIC
+            'AVAX': 0.001,          // 1 USD ≈ 0.001 AVAX
+            'EDU': 0.001,           // 1 USD ≈ 0.001 EDU
             'ZOLLPTT': 1
         };
 

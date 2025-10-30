@@ -31,17 +31,17 @@ export default function PayInvoicePage() {
   
   // Parse invoice ID and network suffix from URL parameter
   const parseUrlParam = (param: string) => {
-    if (!param) return { invoiceId: '', networkSuffix: 't', targetChainId: 2484 }
+    if (!param) return { invoiceId: '', networkSuffix: 't', targetChainId: 545 }
     
     const lastChar = param.slice(-1).toLowerCase()
     if (lastChar === 'm' || lastChar === 't') {
       const invoiceId = param.slice(0, -1)
       const networkSuffix = lastChar
-      const targetChainId = networkSuffix === 'm' ? 39 : 2484 // 39 for mainnet, 2484 for testnet
+      const targetChainId = networkSuffix === 'm' ? 747 : 545 // 747 for Flow mainnet, 545 for Flow testnet
       return { invoiceId, networkSuffix, targetChainId }
     } else {
       // Legacy format without network suffix - default to testnet
-      return { invoiceId: param, networkSuffix: 't', targetChainId: 2484 }
+      return { invoiceId: param, networkSuffix: 't', targetChainId: 545 }
     }
   }
   
@@ -112,7 +112,7 @@ export default function PayInvoicePage() {
   // Network validation
   const isCorrectNetwork = chainId === targetChainId
   const getNetworkName = (chainId: number) => {
-    return chainId === 39 ? 'U2U Mainnet' : chainId === 2484 ? 'U2U Testnet' : `Chain ${chainId}`
+    return chainId === 747 ? 'Flow EVM Mainnet' : chainId === 545 ? 'Flow EVM Testnet' : `Chain ${chainId}`
   }
   const targetNetworkName = getNetworkName(targetChainId)
   const currentNetworkName = getNetworkName(chainId)
@@ -325,7 +325,7 @@ export default function PayInvoicePage() {
   useEffect(() => {
     if (!contractAddress && chainId) {
       console.log('No contract address found for chain ID:', chainId)
-      setError(`Contract not deployed on current network (Chain ID: ${chainId}). Please switch to U2U Testnet.`)
+      setError(`Contract not deployed on current network (Chain ID: ${chainId}). Please switch to Flow EVM Mainnet or Flow EVM Testnet.`)
     }
   }, [contractAddress, chainId])
 
@@ -354,13 +354,13 @@ export default function PayInvoicePage() {
     setIsPaying(true)
     
     try {
-      // Call payInvoice contract function with the exact amount in U2U
+      // Call payInvoice contract function with the exact amount in FLOW
       writeContract({
         address: contractAddress as `0x${string}`,
         abi: InvoicesAbi.abi,
         functionName: 'payInvoice',
         args: [invoice.id],
-        value: invoice.amount, // Send U2U amount
+        value: invoice.amount, // Send FLOW amount
       })
       
       // Note: Don't use toast.loading here as it persists. 
@@ -510,7 +510,7 @@ export default function PayInvoicePage() {
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-black dark:text-white mb-2">Amount</h3>
                 <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                  {formatEther(invoice.amount)} U2U
+                  {formatEther(invoice.amount)} FLOW
                 </div>
               </div>
 
@@ -589,7 +589,7 @@ export default function PayInvoicePage() {
                         <CreditCard className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                         <div>
                           <p className="font-medium text-blue-800 dark:text-blue-300">Payment Amount</p>
-                          <p className="text-2xl font-bold text-blue-900 dark:text-blue-200">{formatEther(invoice.amount)} U2U</p>
+                          <p className="text-2xl font-bold text-blue-900 dark:text-blue-200">{formatEther(invoice.amount)} FLOW</p>
                         </div>
                       </div>
                     </div>
@@ -615,7 +615,7 @@ export default function PayInvoicePage() {
                       ) : (
                         <>
                           <CreditCard className="h-5 w-5 mr-3" />
-                          Pay {formatEther(invoice.amount)} U2U
+                          Pay {formatEther(invoice.amount)} FLOW
                         </>
                       )}
                     </button>
@@ -624,7 +624,7 @@ export default function PayInvoicePage() {
                       {!isCorrectNetwork ? (
                         <>You must be connected to {targetNetworkName} to pay this invoice.</>
                       ) : (
-                        <>Payment will be processed securely on the blockchain. Make sure you have sufficient U2U balance and gas fees.</>
+                        <>Payment will be processed securely on the blockchain. Make sure you have sufficient FLOW balance and gas fees.</>
                       )}
                     </p>
                   </div>
