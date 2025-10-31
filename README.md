@@ -7,9 +7,9 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Wagmi](https://img.shields.io/badge/Wagmi-2.14.16-purple?style=flat-square)](https://wagmi.sh/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4.0-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
-[![U2U Network](https://img.shields.io/badge/U2U%20Network-Mainnet%20%7C%20Testnet-orange?style=flat-square)](https://u2u.xyz/)
+[![Flow EVM](https://img.shields.io/badge/Flow%20EVM-Mainnet%20%7C%20Testnet-green?style=flat-square)](https://flow.com/)
 
-PayZoll is a one-platform decentralized Web3 payment infrastructure that empowers businesses and individuals with comprehensive financial solutions. From bulk payouts, airdrops, and DAO payroll to streaming payments, fiat on-ramps/off-ramps, and AI-powered automation, PayZoll provides secure, scalable, and future-proof Web3-native payment services.
+PayZoll is a unified decentralized Web3 payment infrastructure that empowers businesses and individuals with comprehensive financial solutions through a single dashboard. From bulk payouts, airdrops, and DAO payroll to streaming payments and invoice management, PayZoll provides secure, scalable, and future-proof Web3-native payment services all accessible from one central control center.
 
 ## 📋 Table of Contents
 
@@ -32,17 +32,21 @@ PayZoll serves as a comprehensive decentralized Web3 payment infrastructure, pro
 
 ### 🎯 Vision
 
-We envision a future where Web3 payments are as simple and intuitive as traditional financial transactions, while maintaining the benefits of decentralization, transparency, and global accessibility.
+We envision a future where Web3 payments are as simple and intuitive as traditional financial transactions, while maintaining the benefits of decentralization, transparency, and global accessibility. Our unified dashboard approach eliminates the complexity of managing multiple payment services across different interfaces.
 
 ## ✨ Features
 
 ### 🔴 Live Features
+
+**🎛️ Unified Dashboard**: All payment services accessible from a single, intuitive control center
 
 - **💼 Bulk Payouts**: Efficiently distribute payments to multiple recipients in a single transaction, reducing gas costs and streamlining large-scale payment operations
 - **🎁 Airdrop**: Seamlessly distribute tokens to multiple wallets with customizable criteria and automated distribution mechanisms for marketing campaigns and community rewards
 - **👥 DAO Payroll**: Automated, gas-abstracted disbursements for decentralized organizations, eliminating manual overhead and ensuring contributors get paid on time in their preferred tokens
 - **📡 Streaming Payments**: Real-time money flows for freelancers, DAOs, and distributed teams—no more batch cycles or waiting periods, just continuous value transfer whenever and wherever it's needed
 - **📄 Invoices**: Create and manage professional invoices with crypto payment support
+
+**All services are integrated into a single dashboard at `/dashboard` for seamless payment management**
 
 
 ## 🛠️ Technology Stack
@@ -74,49 +78,49 @@ We envision a future where Web3 payments are as simple and intuitive as traditio
 
 ## 🌐 Network Support
 
-PayZoll is built specifically for the **U2U Network**, supporting both mainnet and testnet environments:
+PayZoll is built specifically for the **Flow EVM**, supporting both mainnet and testnet environments:
 
-### U2U Mainnet
-- **Chain ID**: 39
-- **RPC URL**: https://rpc-mainnet.u2u.xyz
-- **Explorer**: https://u2uscan.xyz
-- **Native Token**: U2U
+### Flow EVM Mainnet
+- **Chain ID**: 747
+- **RPC URL**: https://mainnet.evm.nodes.onflow.org
+- **Explorer**: https://evm.flowscan.io
+- **Native Token**: FLOW
 
-### U2U Testnet
-- **Chain ID**: 2484
-- **RPC URL**: https://rpc-nebulas-testnet.u2u.xyz
-- **Explorer**: https://testnet.u2uscan.xyz
-- **Native Token**: U2U (Testnet)
+### Flow EVM Testnet
+- **Chain ID**: 545
+- **RPC URL**: https://testnet.evm.nodes.onflow.org
+- **Explorer**: https://evm-testnet.flowscan.io
+- **Native Token**: FLOW (Testnet)
 
 ## 📋 Smart Contracts
 
-PayZoll operates through a suite of gas-optimized smart contracts deployed on both U2U Mainnet and Testnet:
+PayZoll operates through a suite of gas-optimized smart contracts deployed on both Flow EVM Mainnet and Testnet:
 
 ### Contract Addresses
 
-#### U2U Mainnet (Chain ID: 39)
+#### Flow EVM Mainnet (Chain ID: 747)
 | Contract | Address | Purpose |
 |----------|---------|---------|
-| **Bulk Transfer** | `0xbb7E1b1Ef5c36fC4aE96879Ea3c4586B68569cAC` | Multi-recipient token transfers |
-| **Airdrop** | `0xDfcB96A9A5744CdfB173C36849Af5bD7343DAb7E` | Token distribution with claim mechanism |
-| **Payroll** | `0x463c2b415329e199a936381b09b7499e7E68d7F9` | Automated employee payments |
-| **Stream** | `0x41353BAFF99bAB4AfE2bb6acF040C8C75B80137f` | Continuous payment streaming |
-| **Invoices** | `0x0A51554c3a743A62fcb6a633cf04CB2e0cd14169` | Invoice creation and payment |
-
-#### U2U Testnet (Chain ID: 2484)
-| Contract | Address | Purpose |
-|----------|---------|---------|
-| **Bulk Transfer** | `0x071A4FCcEEe657c8d4729F664957e1777f6A719E` | Multi-recipient token transfers |
+| **Bulk Transfer** | `0xDfcB96A9A5744CdfB173C36849Af5bD7343DAb7E` | Multi-recipient token transfers |
 | **Airdrop** | `0x563442Ec415De8444059A46fc09F0F552AE8661a` | Token distribution with claim mechanism |
-| **Payroll** | `0xbb7E1b1Ef5c36fC4aE96879Ea3c4586B68569cAC` | Automated employee payments |
-| **Stream** | `0x463c2b415329e199a936381b09b7499e7E68d7F9` | Continuous payment streaming |
-| **Invoices** | `0x288dB1ee3701C3215F4dA5BF1A0d3B2CC8a8185f` | Invoice creation and payment |
+| **Payroll** | `0x0A51554c3a743A62fcb6a633cf04CB2e0cd14169` | Automated employee payments |
+| **Stream** | `0xbb7E1b1Ef5c36fC4aE96879Ea3c4586B68569cAC` | Continuous payment streaming |
+| **Invoices** | `0x41353BAFF99bAB4AfE2bb6acF040C8C75B80137f` | Invoice creation and payment |
+
+#### Flow EVM Testnet (Chain ID: 545)
+| Contract | Address | Purpose |
+|----------|---------|---------|
+| **Bulk Transfer** | `0xDfcB96A9A5744CdfB173C36849Af5bD7343DAb7E` | Multi-recipient token transfers |
+| **Airdrop** | `0x563442Ec415De8444059A46fc09F0F552AE8661a` | Token distribution with claim mechanism |
+| **Payroll** | `0x0A51554c3a743A62fcb6a633cf04CB2e0cd14169` | Automated employee payments |
+| **Stream** | `0xbb7E1b1Ef5c36fC4aE96879Ea3c4586B68569cAC` | Continuous payment streaming |
+| **Invoices** | `0x41353BAFF99bAB4AfE2bb6acF040C8C75B80137f` | Invoice creation and payment |
 
 ### Contract Features
 
 #### 🔄 Bulk Transfer Contract
 - **Gas Optimized**: Minimal gas consumption for batch operations
-- **Multi-Token Support**: ETH and ERC20 token transfers
+- **Multi-Token Support**: FLOW and ERC20 token transfers
 - **Safety Checks**: Comprehensive validation and error handling
 - **Events**: Detailed transaction logging
 
@@ -150,6 +154,14 @@ PayZoll follows a modern, scalable architecture pattern:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
+│                 Unified Dashboard Layer                     │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────────────────┐ │
+│  │  Dashboard  │ │   Service   │ │    Payment Config       │ │
+│  │  Control    │ │Integration  │ │    Management           │ │
+│  └─────────────┘ └─────────────┘ └─────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                            │
+┌─────────────────────────────────────────────────────────────┐
 │                    Frontend Layer                           │
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────────────────┐ │
 │  │   Next.js   │ │   React     │ │      Tailwind CSS       │ │
@@ -168,8 +180,8 @@ PayZoll follows a modern, scalable architecture pattern:
 ┌─────────────────────────────────────────────────────────────┐
 │                  Blockchain Layer                           │
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────────────────┐ │
-│  │ U2U Mainnet │ │ U2U Testnet │ │    Smart Contracts      │ │
-│  │  Chain 39   │ │ Chain 2484  │ │    Solidity ^0.8.19     │ │
+│  │Flow Mainnet │ │Flow Testnet │ │    Smart Contracts      │ │
+│  │  Chain 747  │ │ Chain 545   │ │    Solidity ^0.8.19     │ │
 │  └─────────────┘ └─────────────┘ └─────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -239,6 +251,7 @@ PayZoll_Client_Pharos/
 │   ├── page.tsx                 # Landing page
 │   └── pages/                   # Application pages
 │       ├── about/               # About page
+│       ├── dashboard/          # Unified Dashboard (Main Entry)
 │       ├── airdrop/            # Airdrop functionality
 │       ├── bulk/               # Bulk payments
 │       ├── dao/                # DAO payroll
@@ -264,45 +277,41 @@ PayZoll_Client_Pharos/
 
 ## 🎯 Core Modules
 
-### 1. 💼 Bulk Disbursement
-**Path**: `/pages/bulk`
+### 🎛️ Unified Dashboard
+**Main Path**: `/dashboard` - **Your Central Payment Control Center**
 
+All PayZoll services are integrated into a single, intuitive dashboard that eliminates the need to navigate between different interfaces. The dashboard provides:
+
+**Dashboard Features**:
+- **Service Switcher**: Seamlessly switch between all payment services
+- **Unified Interface**: Consistent UX across all payment operations  
+- **Configuration Management**: Centralized payment settings and token configuration
+- **Real-time Monitoring**: Track all transactions and payment status from one place
+- **Responsive Design**: Optimized for desktop and mobile devices
+
+### Available Services within Dashboard:
+
+#### 1. 💼 Bulk Transfer
 Efficiently distribute payments to multiple recipients in a single transaction.
 
 **Features**:
 - Multi-recipient token transfers
-- Gas cost optimization
+- Gas cost optimization  
 - CSV upload support for recipient lists
 - Real-time transaction tracking
-- Support for both ETH and ERC20 tokens
+- Support for both FLOW and ERC20 tokens
 
-**Use Cases**:
-- Employee salary distributions
-- Vendor payments
-- Reward distributions
-- Marketing campaign payouts
-
-### 2. 🎁 Airdrop
-**Path**: `/pages/airdrop`
-
+#### 2. 🎁 Airdrop
 Seamlessly distribute tokens to multiple wallets with customizable criteria.
 
 **Features**:
 - Token claim mechanism
 - Batch recipient management
-- Automated distribution workflows
+- Automated distribution workflows  
 - Claimable balance tracking
 - Event-driven notifications
 
-**Use Cases**:
-- Token launches
-- Community rewards
-- Marketing campaigns
-- Governance token distribution
-
-### 3. 👥 DAO Payroll
-**Path**: `/pages/dao`
-
+#### 3. 👥 DAO Payroll
 Automated payroll management for decentralized organizations.
 
 **Features**:
@@ -312,15 +321,7 @@ Automated payroll management for decentralized organizations.
 - Payment history tracking
 - Role-based access control
 
-**Use Cases**:
-- DAO contributor payments
-- Freelancer compensation
-- Regular salary disbursements
-- Performance-based rewards
-
-### 4. 📡 Stream Payments
-**Path**: `/pages/streaming`
-
+#### 4. 📡 Token Streaming
 Real-time money flows with continuous value transfer.
 
 **Features**:
@@ -330,15 +331,7 @@ Real-time money flows with continuous value transfer.
 - Stream lifecycle management
 - Instant payment processing
 
-**Use Cases**:
-- Freelancer payments by time
-- Subscription-based services
-- Vesting schedules
-- Performance-based streaming
-
-### 5. 📄 Invoices
-**Path**: `/pages/invoices`
-
+#### 5. 📄 Invoices  
 Create and manage professional invoices with crypto payment support.
 
 **Features**:
@@ -348,11 +341,11 @@ Create and manage professional invoices with crypto payment support.
 - Payment confirmation system
 - Professional invoice formatting
 
-**Use Cases**:
-- Service billing
-- Product sales
-- Consulting payments
-- B2B transactions
+**Why Unified Dashboard?**
+- **Single Entry Point**: No need to remember multiple URLs or navigate between different interfaces
+- **Consistent Experience**: Same UI patterns and interactions across all services
+- **Efficient Workflow**: Switch between services without losing context or re-connecting wallet
+- **Centralized Management**: All your payment activities visible and manageable from one place
 
 ## 👥 Team
 
@@ -419,8 +412,9 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## 🔗 Links
 
 - **Website**: [PayZoll Platform](https://payzoll.xyz)
-- **U2U Network**: [Official Website](https://u2u.xyz)
-- **U2U Explorer**: [Mainnet](https://u2uscan.xyz) | [Testnet](https://testnet.u2uscan.xyz)
+- **Dashboard**: [Unified Payment Control Center](https://payzoll.xyz/dashboard)
+- **Flow Network**: [Official Website](https://flow.com/)
+- **Flow EVM Explorer**: [Mainnet](https://evm.flowscan.io) | [Testnet](https://evm-testnet.flowscan.io)
 
 ---
 
