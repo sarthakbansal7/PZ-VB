@@ -40,13 +40,13 @@ Web3 payments shouldn't be harder than Web2. You shouldn't need 5 different tool
 
 ### 🔴 Live Features
 
-**🎛️ Unified Dashboard**: Everything in one place - no more browser tab chaos
+**🎛️ Single Dashboard for Everything**
 
-- **💼 Bulk Transfers**: Send to multiple addresses in one transaction. Supports CSV uploads and saves ~80% on gas costs compared to individual transfers
-- **🎁 Airdrops**: Token distribution with claim mechanics. Recipients pull when ready, saving you gas on failed transactions
-- **👥 DAO Payroll**: Recurring payments for contributors. Set it once, automates monthly. Works with any ERC20 token
-- **📡 Token Streaming**: Linear vesting and real-time payments. Good for freelancers or time-locked compensation
-- **📄 Invoices**: Professional crypto invoicing. Share links, track payments, get notified when paid
+- **💼 Bulk Transfers**: Batch send to 100s of addresses. Upload CSV, hit send, done. Cuts gas costs by ~80%
+- **🎁 Airdrops**: Create claimable token drops. No more failed txs to inactive wallets - recipients claim when they want
+- **👥 DAO Payroll**: Monthly contributor payments on autopilot. Configure once, forget about it
+- **📡 Token Streaming**: Pay-as-you-go compensation. Perfect for freelancers or vesting schedules
+- **📄 Invoices**: Send payment requests via link. Track who paid, who didn't
 
 **Access everything from `/dashboard` - one URL, one wallet connection, done**
 
@@ -81,8 +81,6 @@ Web3 payments shouldn't be harder than Web2. You shouldn't need 5 different tool
 - **Three.js**: 3D graphics and animations
 
 ## 🌐 Network Support
-
-PayZoll is built specifically for the **Flow EVM**, supporting both mainnet and testnet environments:
 
 ### Flow EVM Mainnet
 - **Chain ID**: 747
