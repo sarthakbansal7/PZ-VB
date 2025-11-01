@@ -352,11 +352,13 @@ Create and manage professional invoices with crypto payment support.
 
 ## 👥 Team
 
+### Vaibhav Panwar - Founder
+Business development expert with entrepreneurial experience. Previously managed North-East India operations for an e-commerce startup with 100+ team members.
+
 ### Abhinav Pangaria - Co-Founder & Lead Engineer
 Full-stack & blockchain developer with expertise in Solidity, Move, Rust, and MERN stack (Next, React-Native). Leads development of smart contracts and frontend & backend development.
 
-### Vaibhav Panwar - Founder
-Business development expert with entrepreneurial experience. Previously managed North-East India operations for an e-commerce startup with 100+ team members.
+
 
 ## 🏆 Achievements
 
@@ -417,8 +419,8 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## 🔗 Links
 
-- **Website**: [PayZoll Platform](https://payzoll.xyz)
-- **Dashboard**: [Unified Payment Control Center](https://payzoll.xyz/dashboard)
+- **Website**: [PayZoll Platform](https://payzoll-green.vercel.app/)
+- **Dashboard**: [Unified Payment Control Center](https://payzoll-green.vercel.app/pages/dashboard/)
 - **📊 Analytics**: [Dune Dashboard - PayZoll Metrics](https://dune.com/sarthak10/payzoll)
 - **Flow Network**: [Official Website](https://flow.com/)
 - **Flow EVM Explorer**: [Mainnet](https://evm.flowscan.io) | [Testnet](https://evm-testnet.flowscan.io)
