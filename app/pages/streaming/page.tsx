@@ -1533,7 +1533,7 @@ function StreamingPage() {
                     onChange={(e) => handleTokenSelection(e.target.value)}
                     className="px-4 py-2 pr-8 text-sm border border-white/20 dark:border-gray-600/30 bg-white/10 dark:bg-gray-700/10 backdrop-blur-md dark:text-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg appearance-none cursor-pointer shadow-lg"
                   >
-                    <option value="U2U" className="bg-white/90 dark:bg-gray-800/90 text-black dark:text-white">U2U (Native)</option>
+                    <option value="FLOW" className="bg-white/90 dark:bg-gray-800/90 text-black dark:text-white">FLOW (Native)</option>
                     {customTokens.map((token) => (
                       <option key={token.symbol} value={token.symbol} className="bg-white/90 dark:bg-gray-800/90 text-black dark:text-white">
                         {token.symbol}
@@ -1599,7 +1599,7 @@ function StreamingPage() {
                       Streaming Contract Not Available
                     </h3>
                     <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
-                      The streaming contract is not deployed on {networkName}. Please switch to U2U Mainnet or U2U Testnet to use this feature.
+                      The streaming contract is not deployed on {networkName}. Please switch to Flow EVM Mainnet or Flow EVM Testnet to use this feature.
                     </p>
                   </div>
                 </div>
@@ -1624,7 +1624,7 @@ function StreamingPage() {
                     Streaming Feature Unavailable
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Please switch to U2U Mainnet or U2U Testnet to use the streaming feature.
+                    Please switch to Flow EVM Mainnet or Flow EVM Testnet to use the streaming feature.
                   </p>
                 </div>
               )}
